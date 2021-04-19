@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-路径绘制</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: indigo;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <img src="./img/quadraticCurveTo.jpg" alt="" />
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+    </canvas>
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        // 设置画布宽高
+        canvas.width = 800;
+        canvas.height = 600;
+
+        // 获取画布上下文对象
+        const ctx = canvas.getContext('2d');
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】！！！
+         * 不然：样式会不生效！！！
+         **/
+
+        /**
+         * 路径绘制方法：
+         *     1、开始建立路径：
+         *         ctx.beginPath();
+         * 
+         *     2、向路径集合中添加子路径：
+         *         [
+         *             ctx.moveTo(x, y); ctx.lineTo(x, y);形状，ctx.closePath(); 可选。
+         *             ctx.moveTo(x, y); ctx.lineTo(x, y);形状，ctx.closePath(); 可选。。。
+         *         ]
+         *     3、显示路径：
+         *         ctx.fill(); 填充; ctx.stroke()描边。
+         * 
+         * 绘制子路径形状方法：
+         *      1、直线：ctx.lineTo(x, y);
+         *      2、矩形：ctx.rect(x, y, w, h);
+         *      3、圆弧：ctx.arc(x, y, r半径, 开始弧度（默认x轴r0度），结束弧度， 方向(顺:0，逆:1时针[默认: 顺时针]));
+         *      4、切线圆弧：ctx.arcTo(x1, y1, x2, y2, r);
+         *      5、二次贝塞尔曲线：ctx.quadraticCurveTo(cpx, cpy, x, y);
+         *      6、三次贝塞尔曲线：ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+         * 
+         * 共用方法：
+         *      1、边框宽度：ctx.lineWidth = 10;
+         *      2、边框色：ctx.strokeStyle = 'blue';
+         *      3、路径填充：ctx.fill();
+         *      4、绘制路径：ctx.stroke();
+         * */
+
+
+        /*绘制二次贝塞尔曲线*/
+        /*-- 辅助线开始 --*/
+        ctx.beginPath();
+        ctx.moveTo(100, 100); // 路径绘制起点
+        ctx.lineTo(500, 100);
+        ctx.lineTo(500, 200);
+        ctx.lineWidth = 1;// 边框宽度
+        ctx.setLineDash([4, 6]);
+        ctx.strokeStyle = 'white';// 边框色
+        ctx.stroke();
+        /*-- 辅助线结束 --*/
+
+        ctx.beginPath();
+        ctx.moveTo(100, 100); // 路径绘制起点
+        ctx.quadraticCurveTo(
+            500, 100, 
+            500, 200
+        );
+        ctx.lineWidth = 2;// 边框宽度
+        ctx.setLineDash([0, 0]);
+        ctx.strokeStyle = 'blue';// 边框色
+        ctx.stroke();
+
+
+        ctx.beginPath();
+        ctx.moveTo(100, 400); // 路径绘制起点
+        ctx.quadraticCurveTo(
+            300, 10,  // 300：左右拉，10：上下拉
+            500, 400
+        );
+        ctx.lineWidth = 3;// 边框宽度
+        ctx.setLineDash([0, 0]);
+        ctx.strokeStyle = 'green';// 边框色
+        ctx.stroke();
+
+    </script>
+</body>
+
+</html>
