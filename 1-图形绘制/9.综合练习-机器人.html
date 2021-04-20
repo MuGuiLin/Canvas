@@ -25,6 +25,7 @@
 </head>
 
 <body>
+    <img src="./img/机器人.jpg" alt="" />
     <canvas id="canvas" width="300" height="150">
         对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
         canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
@@ -46,41 +47,51 @@
          * 不然：样式会不生效！！！
          **/
 
-        /**
-         * 路径绘制方法：
-         *     1、开始建立路径：
-         *         ctx.beginPath();
-         * 
-         *     2、向路径集合中添加子路径：
-         *         [
-         *             ctx.moveTo(x, y); ctx.lineTo(x, y);形状，ctx.closePath(); 可选。
-         *             ctx.moveTo(x, y); ctx.lineTo(x, y);形状，ctx.closePath(); 可选。。。
-         *         ]
-         *     3、显示路径：
-         *         ctx.fill(); 填充; ctx.stroke()描边。
-         * 
-         * 绘制子路径形状方法：
-         *      1、直线：ctx.lineTo(x, y);
-         *      2、矩形：ctx.rect(x, y, w, h);
-         *      3、圆弧：ctx.arc(x, y, r半径, 开始弧度（默认x轴r0度），结束弧度， 方向(顺:0，逆:1时针[默认: 顺时针]));
-         *      4、切线圆弧：ctx.arcTo(x1, y1, x2, y2, r);
-         *      5、二次贝塞尔曲线：ctx.quadraticCurveTo(cpx, cpy, x, y);
-         *      6、三次贝塞尔曲线：ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
-         * 
-         * 共用方法：
-         *      1、边框宽度：ctx.lineWidth = 10;
-         *      2、边框色：ctx.strokeStyle = 'blue';
-         *      3、路径填充：ctx.fill();
-         *      4、绘制路径：ctx.stroke();
-         * */
+        ctx.lineWidth = 40;         // 描边宽度
+        ctx.strokeStyle = 'blue';   // 描边颜色
+        ctx.fillStyle = 'cyan';     // 填充颜色
 
+        // 面部： 矩形绘制方法：ctx.fillRect(x, y, w, h);
+        ctx.fillRect(200, 250, 400, 200);
 
-        /*绘制矩形*/
+        // 面部轮廓：矩形描边方法：ctx.strokeRect(x, y, w, h); 注：（居中描边，内外各占一半）
+        ctx.strokeRect(200, 250, 400, 200);
+
+        // 眼罩：清除矩形方法：ctx.clearRect(x, y, w, h); 注：（会清除内描边）
+        ctx.clearRect(200, 300, 400, 60);
+
+        // 嘴吧：直线路径方法：ctx.lineTo(x, y);
+        ctx.beginPath();
+        ctx.moveTo(300, 400);
+        ctx.lineTo(500, 400);
+        ctx.stroke();
+
+        // 眼睛：圆弧绘制方法：ctx.arc(x, y, radius, Math.PI / 180 * startAngle, Math.PI / 180 * endAngle, anticlockwise);
+        ctx.beginPath();
+        ctx.arc(300, 330, 20, 0, Math.PI * 2, 0);
+        ctx.moveTo(500 - 20, 340);
+        ctx.arc(500, 340, 20, Math.PI, Math.PI * 2, 0);
+        ctx.fillStyle = 'red';     // 填充颜色
+        ctx.fill();
+
+        // 天线：三次贝塞尔曲线：ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+        ctx.beginPath();
+        ctx.moveTo(200, 50);
+        ctx.bezierCurveTo(
+            300, 50,
+            300, 250,
+            400, 250
+        );
+        ctx.stroke();
 
         ctx.beginPath();
-        ctx.rect(100, 100, 400, 200); // rect()方法可不用设置moveTo()起点，因为在rect()自己内置了！！
-        ctx.rect(100, 350, 400, 200);
-        ctx.fill()
+        ctx.moveTo(600, 50);
+        ctx.bezierCurveTo(
+            500, 50,
+            500, 250,
+            400, 250
+        );
+        ctx.stroke();
 
     </script>
 </body>

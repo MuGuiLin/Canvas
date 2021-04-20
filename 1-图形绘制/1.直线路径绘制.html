@@ -10,7 +10,7 @@
         body {
             margin: 0;
             padding: 0;
-            overflow: hidden;
+            /* overflow: hidden; */
         }
 
         #canvas {
@@ -25,6 +25,8 @@
 </head>
 
 <body>
+    <img src="./img/路径绘制原理.jpg" alt="" />
+    <img src="./img/路径和子路径.jpg" alt="" />
     <canvas id="canvas" width="300" height="150">
         对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
         canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
@@ -49,7 +51,7 @@
         /**
          * 路径绘制方法：
          *     1、开始建立路径：
-         *         ctx.beginPath();
+         *         ctx.beginPath(); beginPath()具有清理功能
          * 
          *     2、向路径集合中添加子路径：
          *         [

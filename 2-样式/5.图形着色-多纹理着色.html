@@ -5,12 +5,12 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HTML5-Canvas-图形绘制</title>
+    <title>HTML5-Canvas-图形着色</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            overflow: hidden;
+            /* overflow: hidden; */
         }
 
         #canvas {
@@ -25,6 +25,7 @@
 </head>
 
 <body>
+    <img src="./img/纹理着色.jpg" alt="" />
     <canvas id="canvas" width="300" height="150">
         对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
         canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
@@ -46,26 +47,45 @@
          * 不然：样式会不生效！！！
          **/
 
-        // 填充画布色
-        ctx.fillStyle = 'cyan';
 
-        // 在画布中绘制矩形
-        // ctx.fillRect(x, y, w, h);
-        ctx.fillRect(100, 100, 600, 400);
-
-        // 边框宽度
-        ctx.lineWidth = 10;
-
-        // 边框色
-        ctx.strokeStyle = 'blue';
-
-        // 矩形描边（居中描边，内外各占一半）
-        ctx.strokeRect(100, 100, 600, 400);
-
-        // 清除矩形 （会清除内描边）
-        ctx.clearRect(400, 200, 301, 200);
+        // 变换画布默认起始x和y的左上角，为右下角！！
+        // ctx.translate(canvas.width / 2, canvas.height / 2);
 
 
+        // 获取图片对象源：
+        const img1 = new Image();
+        img1.src = './img/floor.jpg';
+
+        const img2 = new Image();
+        img2.src = './img/line.jpg';
+
+        // 异步加载图片
+        function imgLoad(img) {
+            return new Promise((resolve) => {
+                img.onload = (e) => resolve(img);
+            });
+        };
+
+        // 绘制
+        function ctxDraw() {
+            // ctx.createPattern(Image|Video|Canvas, 'repeat|repeat-x|repeat-y|no-repeat');
+            console.log(img1);
+            const pt1 = ctx.createPattern(img1, 'repeat');
+            ctx.fillStyle = pt1;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const pt2 = ctx.createPattern(img2, 'repeat');
+            ctx.lineWidth = 200;
+            ctx.strokeStyle = pt2;
+            ctx.strokeRect(0, 0, canvas.width, canvas.height);
+        };
+
+
+        // 当所有多个图片都加载完成后，在执行绘制。
+        Promise.all([imgLoad(img1), imgLoad(img2)]).then(() => {
+            // 只有 img1 和 img2 图片都加载完成后，这里才会执行ctxDraw();
+            ctxDraw();
+        });
     </script>
 </body>
 

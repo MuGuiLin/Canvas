@@ -25,6 +25,7 @@
 </head>
 
 <body>
+    <img src="./img/水滴.jpg" alt="" />
     <canvas id="canvas" width="300" height="150">
         对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
         canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
@@ -41,46 +42,43 @@
         // 获取画布上下文对象
         const ctx = canvas.getContext('2d');
 
+
         /**
          * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】！！！
          * 不然：样式会不生效！！！
          **/
 
-        /**
-         * 路径绘制方法：
-         *     1、开始建立路径：
-         *         ctx.beginPath();
-         * 
-         *     2、向路径集合中添加子路径：
-         *         [
-         *             ctx.moveTo(x, y); ctx.lineTo(x, y);形状，ctx.closePath(); 可选。
-         *             ctx.moveTo(x, y); ctx.lineTo(x, y);形状，ctx.closePath(); 可选。。。
-         *         ]
-         *     3、显示路径：
-         *         ctx.fill(); 填充; ctx.stroke()描边。
-         * 
-         * 绘制子路径形状方法：
-         *      1、直线：ctx.lineTo(x, y);
-         *      2、矩形：ctx.rect(x, y, w, h);
-         *      3、圆弧：ctx.arc(x, y, r半径, 开始弧度（默认x轴r0度），结束弧度， 方向(顺:0，逆:1时针[默认: 顺时针]));
-         *      4、切线圆弧：ctx.arcTo(x1, y1, x2, y2, r);
-         *      5、二次贝塞尔曲线：ctx.quadraticCurveTo(cpx, cpy, x, y);
-         *      6、三次贝塞尔曲线：ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
-         * 
-         * 共用方法：
-         *      1、边框宽度：ctx.lineWidth = 10;
-         *      2、边框色：ctx.strokeStyle = 'blue';
-         *      3、路径填充：ctx.fill();
-         *      4、绘制路径：ctx.stroke();
-         * */
 
+        // 变换画布默认起始x和y的左上角，为右下角！！
+        ctx.translate(canvas.width / 2, canvas.height / 2);
 
-        /*绘制矩形*/
+        ctx.lineWidth = 2;         // 描边宽度
+        ctx.strokeStyle = 'white';   // 描边颜色
+        ctx.fillStyle = 'blue';     // 填充颜色
 
         ctx.beginPath();
-        ctx.rect(100, 100, 400, 200); // rect()方法可不用设置moveTo()起点，因为在rect()自己内置了！！
-        ctx.rect(100, 350, 400, 200);
-        ctx.fill()
+        ctx.moveTo(0, 0);
+
+        // 二次贝塞尔曲线路径绘制
+        ctx.quadraticCurveTo(
+            50, -50,  // 左右拉，上下拉
+            50, -100
+        );
+
+        // 圆弧绘制
+        ctx.arc(0, -100, 50, 0, Math.PI, 1);
+
+        // 二次贝塞尔曲线路径绘制
+        ctx.quadraticCurveTo(
+            -50, -50,
+            0, 0
+        );
+
+        // 填充
+        ctx.fill();
+
+        // 显示路径
+        ctx.stroke();
 
     </script>
 </body>
