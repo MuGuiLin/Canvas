@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-描边样式</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: indigo;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <img src="./img/纹理着色.jpg" alt="" />
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+    </canvas>
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        // 设置画布宽高
+        canvas.width = 800;
+        canvas.height = 600;
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】！！！
+         * 不然：样式会不生效！！！
+         **/
+
+
+        // 变换画布默认起始x和y的左上角，为右下角！！
+        // ctx.translate(canvas.width / 2, canvas.height / 2);
+
+        /* 
+         * 端点样式设置
+         * context.lineCap='butt | round | square'; butt:为默认值；
+         */
+
+
+        context.lineWidth = 20;
+        context.strokeStyle = 'red';
+        context.lineCap = 'butt';  // 默认无角端点；
+
+        context.beginPath();
+        context.moveTo(100, 100);
+        context.lineTo(400, 100);
+        context.stroke();
+
+
+        context.save();
+        context.lineWidth = 20;
+        context.strokeStyle = 'green';
+        context.lineCap = 'round'; // 圆形角端点
+
+        context.beginPath();
+        context.moveTo(100, 200);
+        context.lineTo(400, 200);
+        context.stroke();
+        context.restore();
+
+
+        context.lineWidth = 20;
+        context.strokeStyle = 'blue';
+        context.lineCap = 'square'; // 矩形角端点
+        context.beginPath();
+        context.moveTo(100, 300);
+        context.lineTo(400, 300);
+        context.stroke();
+
+    </script>
+</body>
+
+</html>

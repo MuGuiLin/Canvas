@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>canvas像素操作</title>
+    <style>
+        h1{text-align: center;}
+        canvas{ display: block; margin: auto; border: 1px solid gray;}
+    </style>
+</head>
+
+<body>
+    <h1>canvas像素操作</h1>
+    <hr>
+
+    <canvas id="c1" width="400" height="400"></canvas>
+
+</body>
+<script>
+    /*
+    像素操作:
+
+        属性	描述
+        width	返回 ImageData 对象的宽度
+        height	返回 ImageData 对象的高度
+        data	返回一个对象，其包含指定的 ImageData 对象的图像数据
+
+
+        方法1	            描述
+        createImageData() 方法创建新的空白 ImageData 对象。新对象的默认像素值 transparent black。
+
+            对于 ImageData 对象中的每个像素，都存在着四方面的信息，即 RGBA 值：
+
+            R - 红色 (0-255)
+            G - 绿色 (0-255)
+            B - 蓝色 (0-255)
+            A - alpha 通道 (0-255; 0 是透明的，255 是完全可见的)
+            因此 ，transparent black 表示 (0,0,0,0)。
+
+            color/alpha 以数组形式存在，并且既然数组包含了每个像素的四条信息，数组的大小是 ImageData 对象的四倍。（获得数组大小有更简单的办法，就是使用 ImageDataObject.data.length）
+
+            包含 color/alpha 信息的数组存储于 ImageData 对象的 data 属性中。
+
+            提示：在操作完成数组中的 color/alpha 信息之后，您可以使用 putImageData() 方法将图像数据拷贝回画布上。
+
+
+        方法2	            描述
+        getImageData()	返回 ImageData 对象，该对象为画布上指定的矩形复制像素数据
+            注：对于 ImageData 对象中的每个像素，都存在着四方面的信息，即 RGBA 值：
+
+                R - 红色(0 - 255)
+                G - 绿色(0 - 255)
+                B - 蓝色(0 - 255)
+                A - alpha 通道(0 - 255; 0 是透明的，255 是完全可见的)
+                color / alpha 以数组形式存在，并存储于 ImageData 对象的 data 属性中。
+
+            提示：在操作完成数组中的 color / alpha 信息之后，您可以使用 putImageData() 方法将图像数据拷贝回画布上。
+
+            context.getImageData(x, y, width, height);
+
+            参数说明：
+                x	开始复制的左上角位置的 x 坐标。
+                y	开始复制的左上角位置的 y 坐标。
+                width	将要复制的矩形区域的宽度。
+                height	将要复制的矩形区域的高度。
+
+
+        方法3	            描述
+        putImageData()	把图像数据（从指定的 ImageData 对象）放回画布上
+
+            context.putImageData(imgData, x, y, dirtyX, dirtyY, dirtyWidth, dirtyHeight);
+
+            参数说明：
+                imgData	规定要放回画布的 ImageData 对象。
+                x	ImageData 对象左上角的 x 坐标，以像素计。
+                y	ImageData 对象左上角的 y 坐标，以像素计。
+                dirtyX	可选。水平值（x），以像素计，在画布上放置图像的位置。
+                dirtyY	可选。水平值（y），以像素计，在画布上放置图像的位置。
+                dirtyWidth	可选。在画布上绘制图像所使用的宽度。
+                dirtyHeight	可选。在画布上绘制图像所使用的高度。
+
+
+
+
+       
+    */
+
+    window.onload = function () {
+        let oC = document.querySelector('#c1');
+        let oGC = oC.getContext('2d');
+
+        oGC.fillRect(0, 0, 100, 100);
+
+        //获取：画布指定矩形的像素数据
+        var imgData = oGC.getImageData(0, 0, 100, 100);
+
+        console.log(imgData);
+        console.log('数据对象数组：', imgData.data); // 对象中的每个像素，都存在着四方面的信息
+        console.log('数据对象长度：', imgData.data.length);
+        console.log('数据对象第1个像素的R：', imgData.data[0]);
+        console.log('数据对象第2个像素的G：', imgData.data[1]);
+        console.log('数据对象第2个像素的B：', imgData.data[2]);
+        console.log('数据对象第2个像素的A：', imgData.data[3]);
+
+        console.log('一行的像素个数：', imgData.width);
+        console.log('一列的像素个数：', imgData.height);
+
+
+        //设置：画布指定矩形的像素数据, 就是把图像数据（从指定的 ImageData 对象）放回画布上 通过 getImageData() 复制画布上指定矩形的像素数据，然后通过 putImageData() 将图像数据放回画布
+
+        for (let i = 0; i < imgData.width * imgData.height; i++) {
+            imgData.data[4 * i] = 255;      //R
+            imgData.data[4 * i + 1] = 255;  //G
+            imgData.data[4 * i + 2] = 0;    //B
+            imgData.data[4 * i + 3] = 255;  //A
+        };
+
+        oGC.putImageData(imgData, 100, 100);
+
+
+        //创建：新的空白 ImageData 对象 用putImageData进行设置
+
+        var imgData2 = oGC.createImageData(100, 100);
+        
+        //把 ImageData2 对象中的第一个像素变为红色：
+            imgData2.data[0] = 255;
+            imgData2.data[1] = 0;
+            imgData2.data[2] = 0;
+            imgData2.data[3] = 255;
+
+        //把 ImageData2 对象中的第二个像素变为绿色：
+            imgData2.data[4] = 0;
+            imgData2.data[5] = 255;
+            imgData2.data[6] = 0;
+            imgData2.data[7] = 255;
+
+        //把 ImageData2 对象中的第三个像素变为蓝色：
+            imgData2.data[4] = 0;
+            imgData2.data[5] = 0;
+            imgData2.data[6] = 255;
+            imgData2.data[7] = 255;
+
+        for (let i = 1000; i < imgData2.width * imgData2.height; i++) {
+            imgData2.data[4 * i] = parseInt(Math.random() * 256);      //R  0-255之间
+            imgData2.data[4 * i + 1] = parseInt(Math.random() * 256);  //G
+            imgData2.data[4 * i + 2] = parseInt(Math.random() * 256);  //B
+            imgData2.data[4 * i + 3] = parseInt(Math.random() * 256);  //A
+        };
+
+        oGC.putImageData(imgData2, 250, 100);
+
+        
+    };
+</script>
+
+</html>

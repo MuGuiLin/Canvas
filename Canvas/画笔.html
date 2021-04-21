@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Canvas画笔</title>
+		<style>
+			h1{text-align: center;}
+			section{ display: flex; flex-direction: row; justify-content: center;}
+			canvas{ border: 1px solid gray; background: black; position: relative; z-index: 0; cursor: crosshair;}
+			.tool{ padding: 20px; display: flex; flex-direction: column;}
+		</style>
+	</head>
+	<body>
+		<h1>Canvas画笔</h1> <hr/>
+		<section>
+			<canvas id="canvas" width="800px" height="500px"></canvas>
+			<div class="tool">
+				
+				<h4>颜色：</h4>
+				<button onclick="colorFn('red')">红色</button>
+				<button onclick="colorFn('green')">绿色</button>
+				<button onclick="colorFn('blue')">蓝色</button>
+				
+				<h4>粗细：</h4>
+				<input type="range" value="1" oninput="rangeFn(this)" max="10" />
+				
+				<h4>擦除：</h4>
+				<button onclick="penFn()">画笔</button>
+				<button onclick="clearFn(1)">橡皮擦</button>
+				<button onclick="clearFn()">清空</button>
+				
+				
+				<h4>保存：</h4>
+				<button onclick="saveFn('base64')">Base64</button>
+				<button onclick="saveFn('png')">JNG</button>
+				<button onclick="saveFn('image/jpeg')">JPG/JPEG</button>
+			</div>
+		</section>
+		
+	</body>
+	<script>
+		let cvs = document.querySelector('#canvas'),
+			ctx = cvs.getContext('2d');
+			pen = 'white';
+			line = 1;
+			
+		cvs.onmousedown = function(e) {
+			var e = e || window.event;
+
+			ctx.beginPath();
+			ctx.lineCap="round";
+			ctx.strokeStyle = pen;
+			ctx.lineWidth = line;
+			ctx.moveTo(e.clientX - cvs.offsetLeft, e.clientY - cvs.offsetTop);
+			
+			document.onmousemove = function() {
+				var e = e || window.event;
+				ctx.lineTo(e.clientX - cvs.offsetLeft, e.clientY - cvs.offsetTop);
+				ctx.stroke();
+			};
+			
+			document.onmouseup = function() {
+				document.onmousemove = null;
+				document.onmouseup = null;
+			};
+		};
+		
+		function penFn() {
+			ctx.beginPath();
+			ctx.moveTo(0,0);
+			ctx.lineTo(0,0);
+			ctx.stroke();
+		};
+										
+		function colorFn(cor) {
+			pen = cor;
+		};
+		
+		function rangeFn(obj) {
+			line = obj.value;
+		};
+		
+		function clearFn(xpc) {
+			if(xpc) {
+				cvs.onmousedown = function(e) {
+					var e = e || window.event;
+
+					document.onmousemove = function() {
+						var e = e || window.event;
+						ctx.clearRect(e.clientX - cvs.offsetLeft + -5, e.clientY - cvs.offsetTop + -5, 10, 10);
+					};
+					
+					document.onmouseup = function() {
+						document.onmousemove = null;
+						document.onmouseup = null;
+					};
+				};	
+			} else {
+				ctx.clearRect(0, 0, cvs.width, cvs.height);
+			}
+		};
+		
+		function saveFn(img) {
+			var src = cvs.toDataURL(img),
+				img = document.createElement('img');
+				img.src = src;
+			document.body.appendChild(img);
+
+			var a = document.createElement('a');
+				a.href = src;
+				a.download = '我的图画';
+				a.dispatchEvent(new MouseEvent('click'));
+		};
+		
+	</script>
+</html>

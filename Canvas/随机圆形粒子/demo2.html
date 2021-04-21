@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>demo2</title>
+		<style type="text/css">
+			h1{ text-align: center;}
+			canvas{ border: 1px solid gray;}
+		</style>
+	</head>
+	
+	<body>
+		<h1>随机圆形粒子 demo2</h1><hr/>
+		<button type="button" onclick="stop()">停止生成</button> 
+		<canvas id="canvas" width="800" height="600"></canvas>
+	</body>
+	
+	<script type="text/javascript">
+		/*
+		arc() 方法创建弧/曲线（用于创建圆或部分圆）。
+		提示：如需通过 arc() 来创建圆，请把起始角设置为 0，结束角设置为 2*Math.PI。
+		提示：请使用 stroke() 或fill() 方法在画布上绘制实际的弧。
+
+		context.arc(x,y,r,sAngle,eAngle,counterclockwise);
+		x		圆的中心的 x 坐标。
+		y		圆的中心的 y 坐标。
+		r		圆的半径。
+		sAngle	起始角，以弧度计。（弧的圆形的三点钟位置是 0 度）。
+		eAngle	结束角，以弧度计。
+		counterclockwise	可选。规定应该逆时针还是顺时针绘图。False = 顺时针，true = 逆时针。
+		*/
+	   
+		let cvs = document.querySelector('#canvas');
+		let ctx = cvs.getContext('2d');
+		let arr = []; //动画存放动画参数
+		let num = 30; //最大数量
+		
+		//生成数据 
+		let time = setInterval(() => {
+			
+			//当圆的数量 大于 最大数量时
+			if(num < arr.length) {
+				//clearInterval(time);
+			};
+			
+			let r = Math.floor(Math.random() * 256), 		//红色: 0 到 255之间的随机数 
+				g = Math.floor(Math.random() * 256),		//绿色: 0 到 255之间的随机数
+				b = Math.floor(Math.random() * 256),		//蓝色: 0 到 255之间的随机数
+				a = 0.5 + Math.random() * 0.3,				//透明度: 0.5 到 0.8之间的随机数 
+				
+				sx = -2 + Math.ceil(Math.random() * 4), 		//x坐标移动速度: -2 到 2之间的随机数
+				sy = -2 + Math.ceil(Math.random() * 4); 		//y坐标移动速度: -2 到 2之间的随机数
+				
+			//去除 当 x和y 移动速度 都为0时, 动画不动的情况
+			if(0 != sx || 0 != sy) {
+				arr.push({
+					cx: 200 + Math.ceil(Math.random() * 200), 	//x坐标: 200 到 400之间的随机数  
+					cy: 200 + Math.ceil(Math.random() * 200), 	//y坐标: 200 到 400之间的随机数 
+					sx: sx,
+					sy: sy,
+					re: 6 +  Math.ceil(Math.random() * 6),		//圆半径: 6 到 12之间的随机数 
+					bg: `rgba(${r}, ${g}, ${b}, ${a})`			//颜色拼接rgba()
+				});
+			};
+			
+			//console.log(arr);
+		}, 1000/20); //每秒20条
+		
+		//运动动画
+		setInterval(() => {
+			ctx.clearRect(0, 0, cvs.width, cvs.height); 	//清空画布
+			for(let i = 0, len = arr.length; i < len; i++) {
+				arr[i].cx += arr[i].sx; //移动速度
+				arr[i].cy += arr[i].sy; //移动速度
+				
+				ctx.beginPath();
+				ctx.fillStyle = arr[i].bg;
+				ctx.strokeStyle = arr[i].bg;
+				
+				ctx.arc(arr[i].cx, arr[i].cy, arr[i].re, 0, (2 * Math.PI)); //圆中心x坐标，圆中心y坐标，圆半径大小，起始角(弧度)，结束角(弧度)，逆时针(false)
+				
+				ctx.fill();
+				ctx.stroke();
+			}
+		}, 1000/60); //每秒60条帧数
+		
+		
+		function stop() {
+			clearInterval(time);
+		}
+	</script>
+</html>

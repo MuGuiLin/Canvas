@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style type="text/css">
+			body{display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center;}
+			canvas{ border: 1px solid grey;}
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas" width="500" height="350"></canvas>
+	</body>
+	<script type="text/javascript">
+		let cvs = document.getElementById("canvas");
+		let ctx = cvs.getContext('2d');
+		let gra = ctx.createLinearGradient(0, 0, 0, 300); //createLinearGradient(x0,y0,x1,y1);
+			gra.addColorStop(0.1, 'red');
+			gra.addColorStop(0.2, 'orange');
+			gra.addColorStop(0.3, 'yellow');
+			gra.addColorStop(0.4, 'green');
+			gra.addColorStop(0.6, 'cyan');
+			gra.addColorStop(0.8, 'blue');
+			gra.addColorStop(0.9, 'purple');
+			ctx.font = '32px Arial';
+			
+			ctx.fillStyle = gra;
+			ctx.fillRect(10, 10, 230, 280);  //x y w h
+			ctx.fillText('fillRect', 80, 330);
+			
+			ctx.strokeStyle = gra;
+			ctx.strokeRect(260, 10, 230, 280);
+			
+		let y = 20;
+			setInterval(() => {
+				if(260 <= y) {
+					y = 40;
+				} else {
+					y += 20;
+				}
+				//ctx.clearRect(280, y , 200,20);
+				ctx.clearRect(280, 10 , 200,300);
+				ctx.fillText('strokeRect', 300, y);
+				
+			
+			}, 1000);
+			
+			
+	</script>
+</html>

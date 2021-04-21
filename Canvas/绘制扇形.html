@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>绘制扇形</title>
+		<style type="text/css">
+			canvas{ display: block; margin: auto; border: 1px solid green;}
+		</style>
+	</head>
+	
+	<body>
+		<h1>绘制扇形</h1><hr/>
+		<canvas id="canvas" width="800" height="600"></canvas>
+	</body>
+	
+	<script type="text/javascript">
+		let cvs = document.querySelector('#canvas');
+			ctx = cvs.getContext('2d');
+			
+			ctx.beginPath();
+
+			//ctx.arc(400, 300, 200, 0, 360, false) ///圆中心x坐标，圆中心y坐标，圆半径大小，起始角(弧度)，结束角(弧度)，逆时针(false);
+			ctx.arc(400, 300, 200, 0, 0.25 * (2 * Math.PI), false);		
+			ctx.lineTo(200, 200);
+			
+			ctx.fillStyle = 'crimson';
+			ctx.fill();
+	</script>
+</html>
