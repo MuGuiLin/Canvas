@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-图像</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: indigo;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <video id="video" width="800" height="600" controls autoplay loop muted>
+        <source src="./video/奥妙洗衣液.mp4" type="video/mp4">
+    </video>
+
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+    </canvas>
+
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        // 设置画布宽高
+        canvas.width = 800;
+        canvas.height = 600;
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
+
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】！！！
+         * 不然：样式会不生效！！！
+         **/
+
+
+        // 变换画布默认起始x和y的左上角，为右下角！！
+        // context.translate(canvas.width / 2, canvas.height / 2);
+
+        // 重写动画帧方法
+        window.requestAnimationFrame = (function () {
+            return window.requestAnimationFrame ||
+                window.webkitRequestAnimationFrame ||
+                window.mozRequestAnimationFrame ||
+                window.oRequestAnimationFrame ||
+                window.msRequestAnimationFrame ||
+                function (callback) {
+                    window.setTimeout(callback, 1000 / 60);
+                };
+        })();
+
+
+        const video = document.querySelector('#video');
+        let requestId = null;
+
+        function draw() {
+            const { width, height } = video;
+
+            /**
+             * 图像绘制方法：
+             * context.drawImage(Image|video|Canvas, x, y, w1, h1, x2, y2, w2, h2);
+             * 
+            */
+
+            // 绘图 + 位移 context.drawImage(Image, x, y);
+            context.drawImage(video, 0, 0);
+
+            // 绘图 + 位移 + 缩放 context.drawImage(Image, x, y, w, h);
+            context.drawImage(video, 0, 300, width / 2, height / 2);
+
+            // 绘图 + 裁剪 + 位移 + 缩放 context.drawImage(Image, x1, y1, w1, h1, x2, y2, w2, h2);
+            context.drawImage(
+                // 图像源
+                video,
+
+                // 相机视口
+                // width / 2, height / 2, height / 2, height / 2,
+                400, 10, 300, 300,
+
+                // 视图
+                500, 380, 300, 200
+            );
+
+            // 动画帧
+            // requestId = requestAnimationFrame(draw);
+        };
+
+
+        // 监听视频播放时，再进行绘图
+        video.addEventListener('play', function () {
+            // draw();
+
+            // 计时器
+            requestId = setInterval(() => {
+                draw();
+            }, 40);
+        });
+
+        // 监听视频暂停时，取消绘图
+        video.addEventListener('pause', function () {
+            // 清除重绘
+            // window.cancelAnimationFrame(requestId);
+
+            // 清除计时器
+            clearInterval(requestId);
+        });
+
+    </script>
+</body>
+
+</html>
