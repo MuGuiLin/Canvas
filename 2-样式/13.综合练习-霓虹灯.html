@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-描边样式</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: indigo;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <img src="./img/影响描边样式的属性与方法.jpg" alt="" /> <br>
+    <img src="./img/霓虹灯.jpg" alt="" />
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+    </canvas>
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        // 设置画布宽高
+        canvas.width = 800;
+        canvas.height = 1000;
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】！！！
+         * 不然：样式会不生效！！！
+         **/
+
+        /* 
+         * 拐角样式设置
+         * context.lineJoin='miter | bevel | round'; miter:为默认值尖角；
+         * 
+         * 拐角限制 
+         * context.miterLimit = number（1，2，3）; 注：miterLimit 只能用于 context.lineJoin = 'miter'; 其他如：bevel、round 则无效！！
+         * 注：当context.miterLimit = 1; 时 效果和 context.lineJoin = 'bevel'; 相等；
+         * 
+         * 虚线样式设置 
+         * context.setLineDash([Array]); 
+         *      例如当[Array] = [10] 时表示：每个虚线长度为10，中间空隙也为10。
+         *      例如当[Array] = [10, 20] 时表示：每个虚线长度为10，中间空隙为20, 如果有多个值时也是以些类推。
+         * 注：这是一个方法，里面的值是一个数组[]  
+         * 
+         * 虚线偏移样式设置
+         * context.lineDashOffset= value; 
+         * 注：如果在偏移的位置在起止点有空隙时，也会进行填充的！！
+         */
+
+        const color = ['red', 'yellow'];
+        function draw1() {
+
+            /*
+            * 注：由于多次重复投影时，会叠加，所有在绘制前先清除一个画布
+            */
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+
+
+            //保存上下文对象的状态
+            context.save();
+
+            //偏移坐标系
+            context.translate(400, 400);
+
+
+
+            context.beginPath();
+
+            // 心形右半面
+            // 三次贝塞尔路径绘制
+            context.moveTo(0, 0); // 1、路径起点
+            context.bezierCurveTo(
+                200, -50,   // 第1控制点
+                180, -300,  // 第2控制点
+                0, -200 // 路径终点
+            );
+
+            // 心形左半面
+            context.bezierCurveTo(
+                -180, -300,
+                -200, -50,
+                0, 0
+            );
+
+
+            // 线宽
+            context.lineWidth = 10;
+
+            // 第1条虚线
+            context.strokeStyle = color[0];
+            context.setLineDash([30]);
+            context.stroke();
+
+            // 第2条虚线 
+            context.strokeStyle = color[1];
+            context.lineDashOffset = 30;  // 主要在这里
+
+            // 投影 - 光晕效果
+            context.shadowOffsetX = 0;
+            context.shadowOffsetY = 0;
+            context.shadowColor = 'orange';
+            for (let i = 24; i > 5; i -= 4) {
+                context.shadowBlur = 30;
+                context.stroke();
+            }
+
+            context.restore();
+        };
+
+
+
+
+        function draw2() {
+            //保存上下文对象的状态
+            context.save();
+
+            //偏移坐标系
+            context.translate(400, 400);
+
+            context.beginPath();
+
+            // 心形右半面
+            // 三次贝塞尔路径绘制
+            context.moveTo(0, 500); // 1、路径起点
+            context.bezierCurveTo(
+                560, 180,   // 第1控制点
+                100, -100,  // 第2控制点
+                0, 200 // 路径终点
+            );
+
+            // 心形左半面
+            context.bezierCurveTo(
+                -100, -100,
+                -560, 180,
+                0, 500
+            );
+
+            context.lineWidth = 30;
+            // context.lineCap='square';
+
+            // 第1条虚线
+            context.strokeStyle = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
+            context.setLineDash([20, 20]);
+            context.stroke();
+
+            // 第2条虚线 
+            context.strokeStyle = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
+            context.lineDashOffset = 20;  // 主要在这里
+            context.stroke();
+
+            context.fillStyle = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
+            context.fill();
+
+            context.restore();
+        };
+
+
+        setInterval(() => {
+
+            color.reverse();
+            draw1();
+
+            draw2();
+        }, 300);
+
+    </script>
+</body>
+
+</html>

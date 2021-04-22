@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>HTML5 Cancas绘制文字</title>
+	<style type="text/css">
+		* {
+			font-family: "微软雅黑";
+		}
+
+		[id*=CanVas] {
+			border: 1px solid blue;
+			margin: auto;
+			display: block;
+			background: url(image/2.jpg);
+			background-size: 100%;
+			background-color: indigo;
+		}
+	</style>
+</head>
+
+<body>
+	<h1 style="text-align: center;">HTML5 Cancas绘制文字</h1>
+	<hr /><br />
+
+	<canvas id="CanVas" width="800" height="600"></canvas>
+</body>
+
+<script type="text/javascript">
+
+	var context = document.getElementById("CanVas").getContext("2d");
+
+	context.fillStyle = "rgba(255,255,255,0.7)";
+	context.fillRect(0, 60, 800, 50);
+
+	context.fillStyle = "blue";//文字色
+	//文字：加粗     大小     字体(先靠前，先启用)
+	context.font = "bold 40px '宋体','微软雅黑','黑体' ";
+
+	//text					x,y,显示长度
+	context.fillText("HTML5 Cancas 绘制文字", 150, 100, 500);
+
+
+	context.strokeStyle = "white";
+	context.font = "bold 80px '微软雅黑','宋体','黑体' ";
+	context.strokeText("沐枫自然（用轮廓显示，长度被压缩了！）", 100, 300, 600);
+
+
+	context.fillStyle = "red";
+	context.font = "bold 30px '楷体','宋体','黑体' ";
+	context.fillText("2016年03月06日", 400, 530, 800);
+
+
+
+</script>
+
+</html>

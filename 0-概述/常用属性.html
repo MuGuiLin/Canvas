@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<style type="text/css">
+	html,
+	body {
+		font-family: "微软雅黑";
+		font-size: 18px;
+		margin: 0px;
+		padding: 0px;
+	}
+
+	.coordinate {
+		height: 200px;
+		background: green;
+		color: white;
+	}
+
+	#canvas1 {
+		background: red;
+	}
+
+	#canvas2 {
+		background: blue;
+	}
+
+</style>
+
+<body onmousemove="YieRu(event)" onmouseout="YieExit()">
+	<h1 style="text-align: center;">THML5 Canvas标签</h1>
+	<hr />
+	<ul>
+		<li>Canvas标签必须和js脚本配合才能用。</li>
+		<li>Cancas.getContext("2d")//绘图对象</li>
+		<li id="showXY"></li>
+
+		<li>canvas元素本身是没有绘图能力的。所有的绘制工作必须在 JavaScript 内部完成：</li>
+		<li>context.getContext("2d"); //对象是内建的 HTML5 对象</li>
+
+		<li>context.beginPath(); //结束或丢弃任何当前定义的路径并且开始一条新的路径。它把当前的点设置为 (0,0)。</li>
+		<li>context.closePath(); //从当前点到开始点的路径.(返回合并)</li>
+
+		<li>context.arc(300,350,150,0,Math.PI*2,true);//绘制圆形</li>
+
+		<li>context.fill(); //fill() 方法填充当前的图像（路径）。默认颜色是黑色。</li>
+		<li>context.fillStyle = "blue"; //设置背景色</li>
+		<li>context.fillRect(200,60,200,100); // 绘制矩形： 左，上，宽，高规定了形状、位置和尺寸。</li>
+
+		<li>context.strokeStyle = "white"; //线条颜色</li>
+		<li>context.stroke(); //stroke() 方法会实际地绘制出通过 moveTo() 和 lineTo() 方法定义的路径。默认颜色是黑色。</li>
+
+		<li>context.lineWidth(); 路径宽度设置。</li>
+		
+
+	</ul>
+
+	<canvas id="canvas1" width="600" height="600"></canvas>
+	<canvas id="canvas2" width="600" height="600"></canvas>
+	<canvas id="canvas3" width="600" height="600"></canvas>
+
+</body>
+
+<script type="text/javascript">
+
+	YieRu = function (ev) {
+		var x = ev.clientX;//当前鼠标X位置
+		var y = ev.clientY;//当前鼠标Y位置
+		document.getElementById("showXY").innerHTML = "鼠标位置：X坐标:" + x + "，Y坐标:" + y + "";
+	}
+	YieExit = function () {
+		document.getElementById("showXY").innerHTML = "";//清空鼠标位置
+	}
+
+
+
+	const context = document.getElementById("canvas1").getContext("2d");//对象是内建的 HTML5 对象，拥有多种绘制路径、矩形、圆形、字符以及添加图像的方法
+	/*----------------------- 绘制矩形 -----------------------*/
+	context.fillStyle = "blue"; //设置背景色
+	context.fillRect(200, 60, 200, 100); // 绘制矩形： 左，上，宽，高规定了形状、位置和尺寸。
+	context.fillRect(200, 450, 200, 100); // 绘制矩形： 左，上，宽，高规定了形状、位置和尺寸。
+
+
+	/*----------------------- 路径绘制(木字) -----------------------*/
+	context.strokeStyle = "white";//线条颜色
+	context.moveTo(50, 300);// 把窗口的左(x),上(y)角移动到一个指定的坐标。
+	context.lineTo(100, 300);//(定义路径)起始值，结束值
+
+	context.moveTo(75, 280);//窗口位置 x,y
+	context.lineTo(75, 350);
+
+	context.moveTo(75, 300);
+	context.lineTo(50, 340);
+
+	context.moveTo(75, 300);
+	context.lineTo(100, 340);
+
+	context.lineWidth = 8;
+	context.stroke();//stroke() 方法会实际地绘制出通过 moveTo() 和 lineTo() 方法定义的路径。默认颜色是黑色。
+
+
+	/*----------------------- 绘制圆形 -----------------------*/
+	context.beginPath();//结束或丢弃任何当前定义的路径并且开始一条新的路径。它把当前的点设置为 (0,0)。
+
+	//	           
+	context.arc(300, 350, 150, 0, Math.PI * 2, true); //x右， y下， 半径, 起始角度， 结束角度360, 顺时针是否
+	context.closePath(); //从当前点到开始点的路径.(返回合并)
+	context.fill();//fill() 方法填充当前的图像（路径）。默认颜色是黑色。
+
+
+
+
+	/*----------------------- 色彩渐变 ----------------------*/
+	const cv2 = document.getElementById("canvas2").getContext("2d");
+
+	const grd = cv2.createLinearGradient(200, 200, 175, 150);//创建线性的渐变对象,渐变可用于填充矩形、圆形、线条、文本等等。
+	grd.addColorStop(0, "red"); //方法规定 gradient 对象中的 位 置 和 颜色。
+	grd.addColorStop(1, "black");
+	cv2.fillStyle = grd;
+	cv2.fillRect(100, 100, 175, 150);//x , y , w, h;绘制“已填色”的矩形。默认的填充颜色是黑色。
+
+
+
+
+	/*----------------------- 图像处理 ----------------------*/
+	const cxt = document.getElementById("canvas3").getContext("2d");
+	const img = new Image();
+	img.src = "//www.muguilin.com/bg1.aa9d864488c29b6fef46.jpg"
+	img.onload = function () {
+		cxt.drawImage(img, 0, 0, 600, 600);
+	};
+
+
+</script>
+
+</html>

@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<!-- <html lang="en" dir="rtl"> -->
+<html lang="en" dir="ltl">
 
 <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HTML5-Canvas-描边样式</title>
+    <title>HTML5-Canvas-文本</title>
     <style>
         body {
             margin: 0;
@@ -25,8 +26,7 @@
 </head>
 
 <body>
-    <img src="./img/影响描边样式的属性与方法.jpg" alt="" /> <br>
-    <img src="./img/lineJoin线条拐角样式.jpg" alt="" />
+    <img src="./img/布艺文字.jpg" alt="" />
     <canvas id="canvas" width="300" height="150">
         对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
         canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
@@ -43,6 +43,7 @@
         // 获取画布上下文对象
         const context = canvas.getContext('2d');
 
+
         /**
          * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】！！！
          * 不然：样式会不生效！！！
@@ -50,47 +51,47 @@
 
 
         // 变换画布默认起始x和y的左上角，为右下角！！
-        // ctx.translate(canvas.width / 2, canvas.height / 2);
+        // context.translate(canvas.width / 2, canvas.height / 2);
 
-        /* 
-         * 拐角样式设置
-         * context.lineJoin='miter | bevel | round'; miter:为默认值尖角；
-         */
+        // 文本
+        const text = '好好学习';
+
+        // 获取文字宽度
+        const maxWidth = context.measureText(text);
+
+        // 文本颜色：
+        context.fillStyle = '#a76921';
+        context.lineWidth = 8;
+        context.strokeStyle = '#f0d5ac';
+
+        // 文本样式：font(字形，字号，字体)  // 更多参数说明：https://developer.mozilla.org/zh-CN/docs/Web/CSS/font
+        context.font = 'bold 160px 微软雅黑';
+
+        // 文本水平对齐方式： context.textAlign='start 默认 | left | center | right |end';
+        context.textAlign = 'left';
+
+        // 文本垂直对齐方式： context.textBaseline='top | hanging | middle | alphabetic 默认 | ideographic | bottom';
+        // alphabetic标准字母基线对齐 -  默认
+        context.textBaseline = 'middle';
+
+        // 投影
+        context.shadowOffsetX = 0;
+        context.shadowOffsetY = 2;
+        context.shadowBlur = 4;
+        context.shadowColor = 'black';
+
+        // 文本填充
+        context.fillText(text, 80, 300, canvas.width);
 
 
-        context.lineWidth = 30;
-        context.strokeStyle = 'red';
-        context.lineCap = 'butt';  // 默认无角端点；
-        context.lineJoin = 'miter'; // 默认尖角
-        context.beginPath();
-        context.moveTo(100, 100);
-        context.lineTo(250, 300);
-        context.lineTo(150, 300);
-        context.stroke();
+        // 文本描边
+        context.strokeText(text, 80, 300, canvas.width);
 
-
-        context.save();
-        context.lineWidth = 30;
-        context.strokeStyle = 'green';
-        context.lineCap = 'round'; // 圆形角端点
-        context.lineJoin = 'round'; // 圆角
-        context.beginPath();
-        context.moveTo(300, 100);
-        context.lineTo(450, 300);
-        context.lineTo(350, 300);
-        context.stroke();
-        context.restore();
-
-
-        context.lineWidth = 30;
-        context.strokeStyle = 'blue';
-        context.lineCap = 'square'; // 矩形角端点
-        context.lineJoin = 'bevel'; // 斜角 
-        context.beginPath();
-        context.moveTo(500, 100);
-        context.lineTo(650, 300);
-        context.lineTo(550, 300);
-        context.stroke();
+        // 针线效果
+        context.lineWidth = 1;
+        context.strokeStyle = 'black';
+        context.setLineDash([5, 3]);
+        context.strokeText(text, 80, 300, canvas.width);
 
     </script>
 </body>

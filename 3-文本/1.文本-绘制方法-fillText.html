@@ -5,12 +5,12 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HTML5-Canvas-描边样式</title>
+    <title>HTML5-Canvas-文本</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            /* overflow: hidden; */
+            overflow: hidden;
         }
 
         #canvas {
@@ -25,8 +25,7 @@
 </head>
 
 <body>
-    <img src="./img/影响描边样式的属性与方法.jpg" alt="" /> <br>
-    <img src="./img/lineJoin线条拐角样式.jpg" alt="" />
+    <img src="./img/文本-绘制方法-fillText 与 strokeText.jpg" alt="" />
     <canvas id="canvas" width="300" height="150">
         对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
         canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
@@ -43,6 +42,7 @@
         // 获取画布上下文对象
         const context = canvas.getContext('2d');
 
+
         /**
          * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】！！！
          * 不然：样式会不生效！！！
@@ -50,47 +50,25 @@
 
 
         // 变换画布默认起始x和y的左上角，为右下角！！
-        // ctx.translate(canvas.width / 2, canvas.height / 2);
+        // context.translate(canvas.width / 2, canvas.height / 2);
 
-        /* 
-         * 拐角样式设置
-         * context.lineJoin='miter | bevel | round'; miter:为默认值尖角；
-         */
+        const text = 'Hello World';
 
+        // 文本颜色：
+        context.fillStyle = '#00acec';
 
-        context.lineWidth = 30;
-        context.strokeStyle = 'red';
-        context.lineCap = 'butt';  // 默认无角端点；
-        context.lineJoin = 'miter'; // 默认尖角
-        context.beginPath();
-        context.moveTo(100, 100);
-        context.lineTo(250, 300);
-        context.lineTo(150, 300);
-        context.stroke();
+        // 文本样式：font(字形，字号，字体)  // 更多参数说明：https://developer.mozilla.org/zh-CN/docs/Web/CSS/font
+        context.font = 'bold 100px 微软雅黑';
 
+        // 绘制文本：context.fillText(text, x, y, maxWidth);
+        context.fillText(text, 100, 200, canvas.width);
 
-        context.save();
-        context.lineWidth = 30;
-        context.strokeStyle = 'green';
-        context.lineCap = 'round'; // 圆形角端点
-        context.lineJoin = 'round'; // 圆角
-        context.beginPath();
-        context.moveTo(300, 100);
-        context.lineTo(450, 300);
-        context.lineTo(350, 300);
-        context.stroke();
-        context.restore();
+        // 获取文本相关属性
+        console.table(context.measureText(text));
 
+        context.fillStyle = 'blue';
+        context.fillText('沐枫', 100, 400, 1000);
 
-        context.lineWidth = 30;
-        context.strokeStyle = 'blue';
-        context.lineCap = 'square'; // 矩形角端点
-        context.lineJoin = 'bevel'; // 斜角 
-        context.beginPath();
-        context.moveTo(500, 100);
-        context.lineTo(650, 300);
-        context.lineTo(550, 300);
-        context.stroke();
 
     </script>
 </body>

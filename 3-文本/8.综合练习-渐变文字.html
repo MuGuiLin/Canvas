@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<!-- <html lang="en" dir="rtl"> -->
+<html lang="en" dir="ltl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-文本</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: indigo;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+    </canvas>
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        // 设置画布宽高
+        canvas.width = 800;
+        canvas.height = 600;
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
+
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】！！！
+         * 不然：样式会不生效！！！
+         **/
+
+
+        // 变换画布默认起始x和y的左上角，为右下角！！
+        // context.translate(canvas.width / 2, canvas.height / 2);
+
+        // 文本
+        const text = '好好学习';
+
+        // 获取文字宽度
+        const maxWidth = context.measureText(text);
+
+        const lgr = context.createLinearGradient(80, 300, 600, 400);
+
+
+        // 2、添加渐变色 .addColorStop(position, color)
+        lgr.addColorStop(0, 'red');
+        lgr.addColorStop(0.5, 'rgb(0, 255, 0)');
+        lgr.addColorStop(1, 'blue');
+
+        // 文本颜色：
+        context.fillStyle = lgr;
+
+
+        // 文本样式：font(字形，字号，字体)  // 更多参数说明：https://developer.mozilla.org/zh-CN/docs/Web/CSS/font
+        context.font = 'bold 160px 微软雅黑';
+
+        // 文本水平对齐方式： context.textAlign='start 默认 | left | center | right |end';
+        context.textAlign = 'left';
+
+        // 文本垂直对齐方式： context.textBaseline='top | hanging | middle | alphabetic 默认 | ideographic | bottom';
+        // alphabetic标准字母基线对齐 -  默认
+        context.textBaseline = 'middle';
+
+        // 针线效果
+        // context.lineWidth = 1;
+        // context.strokeStyle = 'black';
+        // context.setLineDash([5, 3]);
+        // context.strokeText(text, 80, 300, canvas.width);
+
+
+        // 投影
+        context.shadowOffsetX = 0;
+        context.shadowOffsetY = 2;
+        context.shadowBlur = 4;
+        context.shadowColor = 'black';
+
+        // 文本填充
+        context.fillText(text, 80, 300, canvas.width);
+
+        // 文本描边
+        context.lineWidth = 5;
+        context.strokeStyle = 'white';
+        context.strokeText(text, 80, 300, canvas.width);
+
+
+
+    </script>
+</body>
+
+</html>

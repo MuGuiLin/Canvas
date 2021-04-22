@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<!-- <html lang="en" dir="rtl"> -->
+<html lang="en" dir="ltl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-文本</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: indigo;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <img src="./img/文本-垂直对齐-textBaseline.jpg" alt="" />
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+    </canvas>
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        // 设置画布宽高
+        canvas.width = 1920;
+        canvas.height = 600;
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
+
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】！！！
+         * 不然：样式会不生效！！！
+         **/
+
+
+        // 变换画布默认起始x和y的左上角，为右下角！！
+        // context.translate(canvas.width / 2, canvas.height / 2);
+
+        // 辅助线
+        context.beginPath();
+        context.moveTo(50, 300);
+        context.lineTo(1850, 300);
+        context.lineWidth = 3;
+        context.strokeStyle = 'white';
+        context.setLineDash([10]);
+        context.stroke();
+        context.closePath();
+
+        // 文本颜色：
+        context.fillStyle = '#00acec';
+
+        // 文本样式：font(字形，字号，字体)  // 更多参数说明：https://developer.mozilla.org/zh-CN/docs/Web/CSS/font
+        context.font = 'bold 60px 微软雅黑';
+
+        // 文本垂直对齐方式： context.textBaseline='top | hanging | middle | alphabetic 默认 | ideographic | bottom';
+        // alphabetic标准字母基线对齐 -  默认
+        context.textBaseline = 'alphabetic';
+
+        // 绘制文本： context.fillText(text, x, y, maxWidth);
+        context.fillText('alphabetic', 000, 300, 1000);
+
+        // top上对齐
+        context.textBaseline = 'top';
+        context.fillText('top', 400, 300, 1000);
+
+        // middle垂直居中对
+        context.textBaseline = 'middle';
+        context.fillText('middle', 560, 300, 1000);
+
+        // bottom下对齐
+        context.textBaseline = 'bottom';
+        context.fillText('bottom', 850, 300, 1000);
+
+        // hanging悬挂基线对齐
+        context.textBaseline = 'hanging';
+        context.fillText('hanging', 1150, 300, 1000);
+
+        // ideographic表意基线对齐
+        context.textBaseline = 'ideographic';
+        context.fillText('ideographic', 1480, 300, 1000);
+
+    </script>
+</body>
+
+</html>
