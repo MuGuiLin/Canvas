@@ -1,22 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<!-- <html lang="en" dir="rtl"> -->
+<html lang="en" dir="ltl">
 
 <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HTML5-Canvas-图像</title>
+    <title>HTML5-Canvas-文本</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            overflow: hidden;
+            /* overflow: hidden; */
         }
 
         #canvas {
             /* width: 100px;
             height: 100px; */
-            background-color: indigo;
+            background-color: black;
 
             /*点击穿透*/
             /* pointer-events: none; */
@@ -25,7 +26,6 @@
 </head>
 
 <body>
-    <h1>GIF动画 - 从雪碧图中裁剪图像</h1>
     <canvas id="canvas" width="300" height="150">
         对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
         canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
@@ -42,56 +42,52 @@
         // 获取画布上下文对象
         const context = canvas.getContext('2d');
 
-
         /**
          * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】！！！
          * 不然：样式会不生效！！！
          **/
 
-
         // 变换画布默认起始x和y的左上角，为右下角！！
         // context.translate(canvas.width / 2, canvas.height / 2);
 
-
-        //图片数量 8
-        const len = 8;
-
-        //宽高 256
-        const size = 256;
-
-        //当前帧
-        let site = 0;
-
-        const img = new Image();
-        img.src = './img/bomb.jpg';
-
-        // 注：一定要在图像源加载完成后，再执行绘制方法！！
-        img.onload = draw;
+        // 文本
+        const text = '好 好 学 习';
+        const color = ['red', 'yellow'];
 
         function draw() {
-            const { width, height } = img;
+            context.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 绘图 + 裁剪 + 位移 + 缩放 context.drawImage(Image, x1, y1, w1, h1, x2, y2, w2, h2);
-            context.drawImage(
-                // 图像源
-                img,
+            // 文本样式：font(字形，字号，字体)  // 更多参数说明：https://developer.mozilla.org/zh-CN/docs/Web/CSS/font
+            context.font = 'bold 160px 微软雅黑';
 
-                // 相机视口
-                // width / 2, height / 2, height / 2, height / 2,
-                site * size, 0, size, size,
+            // 文本水平对齐方式： context.textAlign='start 默认 | left | center | right |end';
+            context.textAlign = 'left';
 
-                // 视图 = 位移 + 缩放
-                150, 50, size * 2, size * 2
-            );
+            // 文本垂直对齐方式： context.textBaseline='top | hanging | middle | alphabetic 默认 | ideographic | bottom';
+            // alphabetic标准字母基线对齐 -  默认
+            context.textBaseline = 'middle';
 
-            setTimeout(() => {
-                site++;
-                if (site === len) {
-                    site = 0;
-                };
-                draw();
-            }, 100);
+            // 投影
+            // context.shadowOffsetX = 0;
+            // context.shadowOffsetY = 0;
+            context.shadowBlur = 30;
+            context.shadowColor = '#BF7E00';
+
+            // 文本描边
+            context.lineWidth = 3;
+            context.strokeStyle = color[0];
+            context.setLineDash([5, 0]);
+            context.strokeText(text, 15, 300, canvas.width);
+
+            context.strokeStyle = color[1];
+            context.setLineDash([10]);
+            context.strokeText(text, 15, 300, canvas.width);
         };
+
+        setInterval(() => {
+            color.reverse();
+            draw();
+        }, 500);
 
     </script>
 </body>

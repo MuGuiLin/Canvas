@@ -10,7 +10,7 @@
         body {
             margin: 0;
             padding: 0;
-            overflow: hidden;
+            /* overflow: hidden; */
         }
 
         #canvas {
@@ -25,7 +25,7 @@
 </head>
 
 <body>
-    <h1>GIF动画 - 从雪碧图中裁剪图像</h1>
+    <img src="./img/设置和获取ImageData.jpg" alt="" />
     <canvas id="canvas" width="300" height="150">
         对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
         canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
@@ -36,8 +36,8 @@
         const canvas = document.querySelector('#canvas');
 
         // 设置画布宽高
-        canvas.width = 800;
-        canvas.height = 600;
+        canvas.width = 1000;
+        canvas.height = 800;
 
         // 获取画布上下文对象
         const context = canvas.getContext('2d');
@@ -53,23 +53,22 @@
         // context.translate(canvas.width / 2, canvas.height / 2);
 
 
-        //图片数量 8
-        const len = 8;
-
-        //宽高 256
-        const size = 256;
-
-        //当前帧
-        let site = 0;
-
         const img = new Image();
-        img.src = './img/bomb.jpg';
+        img.src = './img/zhyz.jpg';
 
         // 注：一定要在图像源加载完成后，再执行绘制方法！！
-        img.onload = draw;
-
-        function draw() {
+        img.onload = function () {
             const { width, height } = img;
+
+            /**
+             * 图像绘制方法：
+             * context.drawImage(Image|video|Canvas, x, y, w1, h1, x2, y2, w2, h2);
+             * 
+            */
+
+            /*
+            // 绘图 + 位移 + 缩放 context.drawImage(Image, x, y, w, h);
+            context.drawImage(img, 0, 270, width / 2, height / 2);
 
             // 绘图 + 裁剪 + 位移 + 缩放 context.drawImage(Image, x1, y1, w1, h1, x2, y2, w2, h2);
             context.drawImage(
@@ -78,21 +77,35 @@
 
                 // 相机视口
                 // width / 2, height / 2, height / 2, height / 2,
-                site * size, 0, size, size,
+                400, 10, 300, 300,
 
                 // 视图 = 位移 + 缩放
-                150, 50, size * 2, size * 2
+                0, 0, 200, 200
+            );
+            */
+
+            // 1、在Canvas画布中，绘制图像
+            context.drawImage(img, 0, 0);
+
+
+            // 2、从Canvas画布中，获取ImageData数据：context.getImageData(sx, sy, sw, sh);
+            const imgData = context.getImageData(0, 0, width, height);
+            console.log('获取ImageData数据：', imgData.data);
+
+
+            // 3、在Canvas画布中， 显示ImageData数据：context.putImageData(imagedata, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight);
+            context.putImageData(
+                imgData,
+
+                // 位移 x, y
+                0, 400,
+
+                // 裁剪 x, y, w, h
+                // width / 2, height / 2, width / 2, height / 2
+                320, 0, width / 2, height / 2
             );
 
-            setTimeout(() => {
-                site++;
-                if (site === len) {
-                    site = 0;
-                };
-                draw();
-            }, 100);
         };
-
     </script>
 </body>
 

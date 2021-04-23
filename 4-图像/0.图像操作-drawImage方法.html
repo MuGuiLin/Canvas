@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>drawImage</title>
+    <style>
+        h1 {
+            text-align: center;
+        }
+
+        pre{
+            font-size: 18px
+        }
+
+        canvas {
+            border: 1px solid gray;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Canvas 图片操作 drawImage()方法</h1>
+    <hr>
+
+    <pre>
+        <code>
+            <h4>drawImage()方法的3种图像源</h4>
+            1、image：
+                new Image();
+
+            2、video：
+                &lt video>标签;
+
+            3、canvas：
+                &lt canvas>标签;
+
+            <h4>drawImage()方法的3种调用方式</h4>
+            1、绘图 + 位移：
+                context.drawImage(Image, x, y);
+
+            2、绘图 + 位移 + 缩放：
+                context.drawImage(Image, x, y, w, h);
+
+            3、绘图 + 裁剪 + 位移 + 缩放：
+                context.drawImage(Image, x1, y1, w1, h1, x2, y2, w2, h2);
+        </code>
+    </pre>
+
+    <img id="img-dom" src="./img/zhyz.jpg" alt="" /><br>
+    <canvas id="canvas-dom1" width="500" height="400"></canvas>
+    <canvas id="canvas-dom2" width="500" height="400"></canvas>
+
+</body>
+<script>
+    window.onload = () => {
+
+        let cnv = document.querySelector('#canvas-dom1');
+        let cxt = cnv.getContext('2d');
+
+        //let cxt = document.querySelector('#canvas-dom1').getContext('2d');
+
+        let img = new Image();
+        img.src = './img/zhyz.jpg';
+
+        //注：这种方式必须要img.onload 后再绘制
+        img.onload = () => {
+            cxt.drawImage(img, 0, 0);
+        };
+
+        //这样就不用 img.onload 可直接绘制，因为img-dom 在执行JS时图片已经加载好了。
+        cxt.drawImage(document.querySelector('#img-dom'), 40, 20);
+
+
+        let createCxt = function (id) {
+            this.id = id;
+
+            this.cxt = document.querySelector(this.id).getContext('2d');
+
+            this.img = new Image();
+        };
+
+
+        let cxt2 = new createCxt('#canvas-dom2');
+        console.log(cxt2.img)
+        let img2 = cxt2.img.src = './img/zhyz.jpg';
+        cxt2.img.onload = function () {
+            cxt2.cxt.drawImage(cxt2.img, 10, 10, 200, 180);
+        };
+
+    };
+</script>
+
+</html>

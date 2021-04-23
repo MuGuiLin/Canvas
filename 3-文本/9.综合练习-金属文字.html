@@ -42,7 +42,6 @@
         // 获取画布上下文对象
         const context = canvas.getContext('2d');
 
-
         /**
          * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】！！！
          * 不然：样式会不生效！！！
@@ -53,23 +52,10 @@
         // context.translate(canvas.width / 2, canvas.height / 2);
 
         // 文本
-        const text = '好好学习';
-
-        // 建立线性渐变对象
-        const lgr = context.createLinearGradient(80, 250, 80, 400);
-
-        //添加渐变色 .addColorStop(position, color)
-        lgr.addColorStop(0, '#ECECEC');
-        lgr.addColorStop(0.4, 'rgb(64, 65, 66)');
-        lgr.addColorStop(0.7, '#C6C4C7');
-        lgr.addColorStop(1, '#C6C4C7');
-
-        // 文本颜色：
-        context.fillStyle = lgr;
-
+        const text = 'canvas';
 
         // 文本样式：font(字形，字号，字体)  // 更多参数说明：https://developer.mozilla.org/zh-CN/docs/Web/CSS/font
-        context.font = 'bold 160px 微软雅黑';
+        context.font = 'bold italic 200px 微软雅黑';
 
         // 文本水平对齐方式： context.textAlign='start 默认 | left | center | right |end';
         context.textAlign = 'left';
@@ -79,18 +65,45 @@
         context.textBaseline = 'middle';
 
         // 文本描边
-        context.lineWidth = 5;
-        context.strokeStyle = 'white';
-        context.strokeText(text, 80, 300, canvas.width);
+        context.lineWidth = 12;
+        context.strokeStyle = '#424242';
+        context.strokeText(text, 50, 300, canvas.width);
+
+        // 建立线性渐变对象
+        const tgr = context.createLinearGradient(50, 250, 50, 400);
+
+        //添加渐变色 .addColorStop(position, color)
+        tgr.addColorStop(.2, 'white');
+        tgr.addColorStop(0.4, 'rgb(64, 65, 66)');
+        tgr.addColorStop(0.7, '#C6C4C7');
+        tgr.addColorStop(0.8, 'white');
+
+        // 文本渐变颜色：
+        context.fillStyle = tgr;
 
         // 投影
         context.shadowOffsetX = 0;
-        context.shadowOffsetY = 8;
-        context.shadowBlur = 8;
+        context.shadowOffsetY = 10;
+        context.shadowBlur = 15;
         context.shadowColor = 'black';
 
         // 文本填充
-        context.fillText(text, 80, 300, canvas.width);
+        context.fillText(text, 50, 300, canvas.width);
+
+        // 建立线性渐变对象
+        const bgr = context.createLinearGradient(0, 100, 0, 300);
+
+        //添加渐变色 .addColorStop(position, color)
+        bgr.addColorStop(0.0, 'gray');
+        bgr.addColorStop(0.6, 'white');
+        bgr.addColorStop(0.8, 'gray');
+        bgr.addColorStop(0.9, 'gray');
+        bgr.addColorStop(1, 'white');
+
+        // 文本渐变描边
+        context.lineWidth = 3;
+        context.strokeStyle = bgr;
+        context.strokeText(text, 50, 300, canvas.width);
 
     </script>
 </body>

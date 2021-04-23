@@ -75,18 +75,13 @@
             */
             context.clearRect(0, 0, canvas.width, canvas.height);
 
-
-
             //保存上下文对象的状态
             context.save();
 
             //偏移坐标系
             context.translate(400, 400);
 
-
-
             context.beginPath();
-
             // 心形右半面
             // 三次贝塞尔路径绘制
             context.moveTo(0, 0); // 1、路径起点
@@ -102,7 +97,6 @@
                 -200, -50,
                 0, 0
             );
-
 
             // 线宽
             context.lineWidth = 10;

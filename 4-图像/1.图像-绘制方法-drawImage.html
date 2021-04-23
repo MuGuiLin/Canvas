@@ -10,7 +10,7 @@
         body {
             margin: 0;
             padding: 0;
-            overflow: hidden;
+            /* overflow: hidden; */
         }
 
         #canvas {
@@ -21,10 +21,23 @@
             /*点击穿透*/
             /* pointer-events: none; */
         }
+
+        .h1 {
+            margin-left: 20px;
+            padding-left: 10px;
+            line-height: 36px;
+            font-size: 26px;
+            color: #019cde;
+            font-weight: 500;
+            border-left: 5px solid #019cde;
+        }
     </style>
 </head>
 
 <body>
+    <img src="./img/图像源及操作方式.jpg" alt="" /> <br>
+    <img src="./img/图像操作理解.jpg" alt="" /> <br>
+    <h1 class="h1">实例效果</h1>
     <img src="./img/zhyz.jpg" alt="" />
     <canvas id="canvas" width="300" height="150">
         对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
@@ -82,7 +95,7 @@
                 // width / 2, height / 2, height / 2, height / 2,
                 400, 10, 300, 300,
 
-                // 视图
+                // 视图 = 位移 + 缩放
                 0, 0, 200, 200
             );
         };

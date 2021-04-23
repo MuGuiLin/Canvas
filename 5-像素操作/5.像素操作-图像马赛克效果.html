@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-图像</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: indigo;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+        input[type="range"]{
+            display: block;
+            width: 950px;
+            height: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <img src="./img/像素操作方法.jpg" alt="" />
+    <input type="range" name="" id="range" max="100" min="1" value="5" />
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+    </canvas>
+    <img src="./img/求r在像素集合里的索引位置ind.jpg" alt="" />
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        // 设置画布宽高
+        canvas.width = 950;
+        canvas.height = 1100;
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
+
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】！！！
+         * 不然：样式会不生效！！！
+         **/
+
+
+        // 变换画布默认起始x和y的左上角，为右下角！！
+        // context.translate(canvas.width / 2, canvas.height / 2);
+
+
+        const img = new Image();
+        img.src = './img/zhyz.jpg';
+
+        // 注：一定要在图像源加载完成后，再执行绘制方法！！
+        img.onload = draw;
+
+        // 色块尺寸大小
+        let size = 5;
+
+        function draw() {
+            const { width, height } = img;
+
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 在Canvas画布中，绘制图像
+            context.drawImage(img, 0, 0);
+
+            // 从Canvas画布中，获取ImageData数据：context.getImageData(sx, sy, sw, sh);
+            const imgData = context.getImageData(0, 0, width, height);
+            const pxArr = imgData.data;
+
+            console.log(size);
+            // 像行列列遍历 
+            for (let y = 0; y < height; y += size) {
+
+                for (let x = 0; x < width; x += size) {
+
+                    // 见：求r在像素集合里的索引位置ind
+                    const i = (y * width + x) * 4;
+
+                    const [r, g, b] = [
+                        pxArr[i],
+                        pxArr[i + 1],
+                        pxArr[i + 2]
+                    ];
+
+                    context.fillStyle = `RGB(${r}, ${g}, ${b})`;
+                    context.fillRect(x, y, size, size);
+                }
+            };
+
+            // 在Canvas画布中， 显示ImageData数据：context.putImageData(imagedata, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight);
+            context.putImageData(
+                imgData,
+
+                // 位移 x, y
+                0, height + 10,
+
+                // 裁剪 x, y, w, h
+                // width / 2, height / 2, width / 2, height / 2
+                // 320, 0, width / 2, height / 2
+            );
+        };
+
+        document.querySelector('#range').addEventListener('change', function(){
+            console.log(this.value);
+            size = this.value;
+            setTimeout(() => {
+                draw();
+            }, 1000);
+            
+        });
+
+    </script>
+</body>
+
+</html>

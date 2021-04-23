@@ -2,13 +2,13 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
-		<title>canvas像素操作图片像素操作-渐变</title>
+		<title>canvas像素操作图片像素操作-倒影+反色</title>
 		<style type="text/css">
 			canvas{border: 1px solid gray; margin: auto; display: block;}
 		</style>
 	</head>
 	<body>
-		<h1 id="h1" style="text-align: center;">canvas像素操作图片像素操作-渐变</h1><hr />
+		<h1 id="h1" style="text-align: center;">canvas像素操作图片像素操作-倒影+反色</h1><hr />
 		<canvas id="canvas" width="400" height="400"></canvas>
 	</body>
 	
@@ -20,7 +20,7 @@
 			let oG = oC.getContext("2d");
 
 			let img = new Image();
-				img.src= './image/3.jpg';
+			img.src= './img/zhyz.jpg';
 
 			img.onload = function() {
 				draw(this);
@@ -74,11 +74,11 @@
 						var cArr = [];
 						var color = getXY(oImg, j, i);
 
-						//像素赋值;
-						cArr[0] = color[0]; //R
-						cArr[1] = color[1];	//G
-						cArr[2] = color[2];	//B
-						cArr[3] = 255 * i / h;	//A  //渐变
+						///反色 = 获取到的色值 - 255;
+						cArr[0] = 255 - color[0]; 	//R
+						cArr[1] = 255 - color[1];	//G
+						cArr[2] = 255 - color[2];	//B
+						cArr[3] = 255;				//A 注：透明度不能太少，不然看不见
 
 						//倒影 = 把第一行设置到最后一行
 						setXY(nImg, j, h - i, cArr);

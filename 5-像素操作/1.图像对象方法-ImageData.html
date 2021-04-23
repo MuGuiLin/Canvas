@@ -10,7 +10,7 @@
         body {
             margin: 0;
             padding: 0;
-            overflow: hidden;
+            /* overflow: hidden; */
         }
 
         #canvas {
@@ -25,7 +25,7 @@
 </head>
 
 <body>
-    <h1>GIF动画 - 从雪碧图中裁剪图像</h1>
+    <img src="./img/像素操作-ImageData对象.jpg" alt="" />
     <canvas id="canvas" width="300" height="150">
         对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
         canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
@@ -36,7 +36,7 @@
         const canvas = document.querySelector('#canvas');
 
         // 设置画布宽高
-        canvas.width = 800;
+        canvas.width = 600;
         canvas.height = 600;
 
         // 获取画布上下文对象
@@ -53,45 +53,16 @@
         // context.translate(canvas.width / 2, canvas.height / 2);
 
 
-        //图片数量 8
-        const len = 8;
+        /*
+         * 在Canvas画布中获取ImageData数据：
+         *  context.getImageData(sx, sy, sw, sh);
+         */
+        const imgData = context.getImageData(0, 0, 1, 1);
+        console.log('获取第1个像素点数据：', imgData.data);
 
-        //宽高 256
-        const size = 256;
-
-        //当前帧
-        let site = 0;
-
-        const img = new Image();
-        img.src = './img/bomb.jpg';
-
-        // 注：一定要在图像源加载完成后，再执行绘制方法！！
-        img.onload = draw;
-
-        function draw() {
-            const { width, height } = img;
-
-            // 绘图 + 裁剪 + 位移 + 缩放 context.drawImage(Image, x1, y1, w1, h1, x2, y2, w2, h2);
-            context.drawImage(
-                // 图像源
-                img,
-
-                // 相机视口
-                // width / 2, height / 2, height / 2, height / 2,
-                site * size, 0, size, size,
-
-                // 视图 = 位移 + 缩放
-                150, 50, size * 2, size * 2
-            );
-
-            setTimeout(() => {
-                site++;
-                if (site === len) {
-                    site = 0;
-                };
-                draw();
-            }, 100);
-        };
+        context.font = 'bold italic 68px 微软雅黑';
+        context.fillStyle = 'white';
+        context.fillText('rgba：' + [...imgData.data], 100, 100, canvas.width);
 
     </script>
 </body>

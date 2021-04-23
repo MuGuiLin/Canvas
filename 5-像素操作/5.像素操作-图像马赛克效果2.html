@@ -2,13 +2,13 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
-		<title>canvas像素操作图片像素操作-倒影+反色</title>
+		<title>canvas像素操作图片像素操作-马赛克</title>
 		<style type="text/css">
 			canvas{border: 1px solid gray; margin: auto; display: block;}
 		</style>
 	</head>
 	<body>
-		<h1 id="h1" style="text-align: center;">canvas像素操作图片像素操作-倒影+反色</h1><hr />
+		<h1 id="h1" style="text-align: center;">canvas像素操作图片像素操作-马赛克</h1><hr />
 		<canvas id="canvas" width="400" height="400"></canvas>
 	</body>
 	
@@ -20,7 +20,7 @@
 			let oG = oC.getContext("2d");
 
 			let img = new Image();
-				img.src= './image/3.jpg';
+				img.src= './img/zhyz.jpg';
 
 			img.onload = function() {
 				draw(this);
@@ -68,20 +68,24 @@
 				//创建一个新的像素对象，用于 倒影 
 				let nImg = oG.createImageData(obj.width, obj.height);  //注：跨源问题，在Firefox浏览器可以运行
 
-				for( var i = 0; i < h; i++) {
+				let num = 8; //模糊度
 
-					for(var j = 0; j < w; j++) {
-						var cArr = [];
-						var color = getXY(oImg, j, i);
+				let row = w / num;
+				let col = h / num;
 
-						///反色 = 获取到的色值 - 255;
-						cArr[0] = 255 - color[0]; 	//R
-						cArr[1] = 255 - color[1];	//G
-						cArr[2] = 255 - color[2];	//B
-						cArr[3] = 255;				//A 注：透明度不能太少，不然看不见
+				for(let i = 0; i < col; i++) {
 
-						//倒影 = 把第一行设置到最后一行
-						setXY(nImg, j, h - i, cArr);
+					for(let j = 0; j < row; j++) {
+
+						let color = getXY(oImg, j * num + Math.floor(Math.random() * num), i * num + Math.floor(Math.random() * num));
+
+						for(let k = 0; k < num; k++) {
+
+							for(let l = 0; l < num; l++) {
+
+								setXY(nImg, j * num + l, i * num + k, color);
+							};
+						};
 					};
 				};
 
