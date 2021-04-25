@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-动画</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: white;
+            border: 1px solid gray;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <img src="./img/动画速度.jpg" alt="" />
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+    </canvas>
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        // 设置画布宽高
+        canvas.width = 600;
+        canvas.height = 600;
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
+
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】！！！
+         * 不然：样式会不生效！！！
+         **/
+
+        /**
+            * 动画驱动方法：
+
+            *  定时器：siId = setInterval(() => {}, interval);
+            *  清除定时器：clearInterval(siId);
+
+            *  延时器：stId = setTimeout(() => {}, timeout);
+            *  清除延时器：clearTimeout(stId)      
+
+            *  动画帧：rqId = requestAnimationFrame()
+            *  清除动画帧：cancelAnimationFrame(rqId);
+       
+        */
+
+        const { width, height } = canvas;
+
+        // 粒子尺寸
+        const partSize = 24;
+
+        // 粒子运动边界
+        const edge = {
+            left: 0,
+            right: width,
+            bottom: height - 50
+        };
+
+        // 粒子
+        class Particle {
+            constructor(w, h) {
+                // 粒子宽度
+                this.w = w;
+
+                // 粒子高度
+                this.h = h;
+
+                // x坐标
+                this.x = 100;
+
+                // y坐标
+                this.y = 0;
+
+                // 粒子状态：1新生(创建)，0坠落(发射)；
+                this.state = 1;
+
+                // 父级
+                this.parent = null;
+
+                // 粒子速度
+                this.sx = this.getSx();
+                this.sy = 0.002;
+
+                // 粒子重力 (也就是y坐标的加速度)
+                this.gravity = 0.03;
+
+                // 粒子弹力
+                this.bounce = 0.85;
+            };
+
+            /*
+            * 获取粒子的 x坐标的速度（避免直上直下的弹动）
+            * 所以sx的取值范围是[-0.5, 0.5], 但不能在[-0.15, 0.15]之间
+            */
+            getSx() {
+                // 获取-0.5到 0.5之间的随机数
+                let sx = Math.random() - 0.5;
+
+                // 如果获取到的sx的绝对值在-0.15到0.15之间,就重新再获取一次，也就是不能在[-0.15, 0.15]之间
+                return (0.15 > Math.abs(sx)) ? this.getSx() : sx;
+            };
+
+            // 改变粒子位置 diff以毫秒为单位的时间差
+            update(diff) {
+                const { w, state, parent, gravity, bounce } = this;
+                const { left, right, bottom } = edge;
+
+                // 如果粒子的状态处于坠落状态时
+                if (!state) {
+                    // 让粒子的y坐标的速度加上重力
+                    this.sy += gravity;
+
+                    // 设置粒子的位置
+                    this.x += this.sx * diff;
+                    this.y += this.sy * diff;
+
+
+                    /*
+                     *  粒子碰撞检测
+                    */
+
+                    // 检测到当粒子运动到画布底部时
+                    if (bottom < this.y) {
+                        this.y = bottom;
+                        // 粒子y坐整流反弹
+                        this.sy *= -bounce;
+                    };
+
+                    // 检测到当粒子运动超出画布左边矩 或 右边矩时
+                    if (left > this.x + w || right < this.x) {
+                        // 删除当前超出画布的粒子
+                        this.parent.removeParticle(this);
+                    }
+                };
+            };
+
+            // 绘图方法
+            draw(ctx) {
+                const { x, y, w, h } = this;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                ctx.save();
+                ctx.fillStyle = 'blue';
+                ctx.fillRect(x, y, w, h);
+                ctx.restore();
+            };
+
+        };
+
+        // 发射器
+        class Launcher {
+            constructor(w, h) {
+                // 尺寸
+                this.w = w;
+                this.h = h;
+
+                // 位置
+                this.x = 0;
+                this.y = 0;
+
+                // 发射状态：1发射器中有粒子， 0发射器中没有粒子(默认)
+                this._state = 0;
+
+                // 粒子库
+                this.children = [];
+            };
+
+            get state() {
+                return this._state;
+            };
+
+            set state(val) {
+                if (val !== this._state) {
+                    if (val) {
+                        // 创建粒子
+                        this.createParticle()
+                    } else {
+                        // 发射粒子（改变粒子状态）
+                        this.children[0].state = 0;
+                    }
+                    this._state = val;
+                };
+
+            };
+
+            // 创建粒子
+            createParticle() {
+                const { x, y, w, h, children } = this;
+
+                // 实例化粒子对象
+                const part = new Particle(w, h);
+
+                // 设置粒子位置
+                part.x = x;
+                part.y = y;
+
+                // 指定粒子父级
+                part.parent = this;
+
+                // 将粒子以数组前置arr.unshfi()添加的方式【这样可保证最前面的粒子永远在发射器中的】，添加到粒子仓库中
+                children.unshift(part);
+            };
+
+            // 删除粒子
+            removeParticle(ele) {
+                const { children } = this;
+                const index = children.indexOf(ele);
+                if (-1 !== index) {
+                    children.splice(index, 1);
+                };
+            };
+
+            // 更新粒子
+            updateParticle(diff) {
+                this.children.forEach(ele => {
+                    ele.update(diff)
+                });
+            };
+
+            // 绘制辅助线
+            drawStroke(ctx) {
+                const { x, y, w, h } = this;
+                ctx.save();
+                ctx.strokeStyle = 'blue';
+                ctx.strokeRect(x, y, w, h);
+                ctx.restore();
+            };
+        };
+
+        const launcher = new Launcher(partSize, partSize);
+        launcher.x = width / 2 - 80;
+        launcher.y = 50;
+
+
+        launcher.state = 1;
+        launcher.state = 0;
+        setInterval(() => {
+            // 随机获取 0 或 1 的数字
+            launcher.state = Math.round(Math.random());
+        }, 100);
+
+
+
+        // 计时器
+        let times = new Date();
+        // 计算时间差
+        function updateTime() {
+            const now = new Date();
+            const diff = now - times;
+            times = now;
+            // 返时间差、时、分、秒
+            return diff;
+        };
+
+        !(function render() {
+            // 获取时间差
+            const diff = updateTime();
+
+            // 更新粒子发射器
+            launcher.updateParticle(diff);
+
+            // 绘制辅助线
+            launcher.drawStroke(context);
+
+            // 绘制粒子发射器里的粒子
+            launcher.children.forEach(ele => {
+                ele.draw(context);
+            })
+
+            requestAnimationFrame(render);
+        })();
+
+
+
+    </script>
+</body>
+
+</html>
