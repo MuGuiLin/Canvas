@@ -7,8 +7,15 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>canvas时钟</title>
     <style>
-        h1 { text-align: center; }
-        canvas {  display: block; margin: auto; border: 1px solid gray; }
+        h1 {
+            text-align: center;
+        }
+
+        canvas {
+            display: block;
+            margin: auto;
+            border: 1px solid gray;
+        }
     </style>
 </head>
 
@@ -19,10 +26,6 @@
 </body>
 
 <script>
-    window.onload = function () {
-        setInterval(oCan, 1000); //毫秒
-    };
-
     function oCan() {
         var circleX = 200;
         var circleY = 200;
@@ -122,6 +125,15 @@
         ogc.closePath();
         ogc.restore();
     };
+
+    // window.onload = function () {
+    //     setInterval(oCan, 1000); //毫秒
+    // };
+
+    !(function render() {
+        oCan();
+        requestAnimationFrame(render);
+    })();
 </script>
 
 </html>

@@ -1,7 +1,11 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-变换</title>
 	<style>
 		canvas {
 			background: transparent;
@@ -94,13 +98,15 @@
 			cxt.fill();
 			cxt.restore();
 
+			console.log(time);
 			time += 1; //每画一次图像，时间参数加1
 		};
-
-		draw(cxt);
-		draw(cxt2);
+		
 		//使地球动起来
-		setInterval(draw(cxt), 10);
+		setInterval(() => {
+			draw(cxt);
+			draw(cxt2);
+		}, 10);
 	</script>
 </body>
 

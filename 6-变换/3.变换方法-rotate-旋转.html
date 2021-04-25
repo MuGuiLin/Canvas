@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HTML5-Canvas</title>
+    <title>HTML5-Canvas-变换</title>
     <style>
         body {
             margin: 0;
@@ -25,13 +25,7 @@
 </head>
 
 <body>
-    <h1 style="text-align: center;">THML5 Canvas标签</h1>
-    <hr>
-    <h3>
-        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
-        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
-    </h3>
-    <img src="./img/context状态管理.jpg" alt="" />
+    <img src="./img/旋转变换-rotate.jpg" alt="" />
     <canvas id="canvas" width="300" height="150">
         对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
         canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
@@ -42,40 +36,39 @@
         const canvas = document.querySelector('#canvas');
 
         // 设置画布宽高
-        canvas.width = (window || this || self || globalThis).innerWidth;
-        canvas.height = (window || this || self || globalThis).innerHeight;
+        canvas.width = 800;
+        canvas.height = 600;
 
         // 获取画布上下文对象
         const context = canvas.getContext('2d');
+
 
         /**
          * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】！！！
          * 不然：样式会不生效！！！
          **/
 
-        context.save();
 
-        // 填充画布色
-        context.fillStyle = 'cyan';
+        /**
+            * 变换方法：变换的本质是对canvas【坐标系】的操作，所以注：会影响全局画布(所有绘制)！！
 
-        // 在画布中绘制矩形
-        // context.fillRect(x, y, w, h);
-        context.fillRect(100, 100, 600, 400);
+            *  位移：context.translate(x, y); 
+            *  旋转：context.rotate(Math.PI / 180 * degree);
+            *  缩放：context.scale(x, y);
+            * 
+            *  相对变换矩阵：context.transform(a, b, c, d, e, f);
+            *  绝对变换矩阵：context.setTransform(a, b, c, d, e, f);
+        */
 
-        context.restore();
+        // 变换画布默认起始x和y的左上角，为右下角！！
+        // context.translate(canvas.width / 2, canvas.height / 2);
 
-        // context.fillStyle = 'red';
-        context.fillRect(800, 100, 600, 400);
-        
+        // context.rotate(Math.PI * 2);  // 360度
+        context.rotate(Math.PI / 15);
 
-        context.font='50px sans-serif';
 
-        context.fillStyle = 'white';
-        context.fillText('沐枫', 1000, 200, canvas.width);
-        
-        context.strokeStyle = 'red';
-        context.strokeText('沐枫', 1000, 280, canvas.width);
-        
+        context.fillStyle = 'blue';
+        context.fillRect(100, 100, 200, 200);
 
 
     </script>

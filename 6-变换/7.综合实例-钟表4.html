@@ -7,26 +7,33 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>canvas时钟</title>
     <style>
-        h1 { text-align: center; }
-        canvas { display: block; margin: auto; border: 1px solid gray;}
+        h1 {
+            text-align: center;
+        }
+
+        canvas {
+            display: block;
+            margin: auto;
+            border: 1px solid gray;
+        }
     </style>
 </head>
 
 <body>
     <h1>canvas时钟</h1>
     <hr>
-    <canvas id="c1" width="400" height="400"></canvas>
+    <canvas id="c1" width="300" height="300"></canvas>
 </body>
 
 <script>
     window.onload = function () {
         var oC = document.getElementById('c1');
         var ctx = oC.getContext('2d');
-        
+
         init(); //此处先引用函数是为了防止加载完页面的第一秒有空白画面。
         function init() {
             ctx.save();
-            ctx.clearRect(0,0,300,300);
+            ctx.clearRect(0, 0, 300, 300);
             ctx.translate(150, 150);
             ctx.rotate(-Math.PI / 2);
             ctx.lineWidth = 6;
@@ -54,50 +61,54 @@
             if (h > 12) {
                 h -= 12;
             }
-    //                    时针的角度=360/12*小时+360/12/60分钟+360/12/60/60秒;
-    //                    换算成弧度
-    //                    时针的弧度= π/6*小时+π/360*分钟+π/2160*秒
+            //                    时针的角度=360/12*小时+360/12/60分钟+360/12/60/60秒;
+            //                    换算成弧度
+            //                    时针的弧度= π/6*小时+π/360*分钟+π/2160*秒
             ctx.save();
             ctx.lineWidth = 9;
+            ctx.strokeStyle = "blue";
             ctx.beginPath();
             ctx.rotate(h * (Math.PI / 6) + (Math.PI / 360) * m + (Math.PI / 21600) * s);
             ctx.moveTo(-20, 0);
             ctx.lineTo(80, 0);
             ctx.stroke();
             ctx.restore();
-    //                    分针的角度=360/60*分钟+360/60/60*秒
-    //                    分针的弧度 =π/30*分钟+π/1800*秒
+
+            //                    分针的角度=360/60*分钟+360/60/60*秒
+            //                    分针的弧度 =π/30*分钟+π/1800*秒
             ctx.save();
             ctx.lineWidth = 7;
+            ctx.strokeStyle = "green";
             ctx.beginPath();
             ctx.rotate((Math.PI / 30) * m + (Math.PI / 1800) * s);
             ctx.moveTo(-20, 0);
             ctx.lineTo(112, 0);
             ctx.stroke();
             ctx.restore();
-    //                    秒针的角度=360/60*秒
-    ////                    秒针的弧度 =π/30*秒
+
+            //                    秒针的角度=360/60*秒
+            //                    秒针的弧度 =π/30*秒
             ctx.save();
             ctx.lineWidth = 6;
-            ctx.strokeStyle = "green";
             ctx.beginPath();
             ctx.rotate((Math.PI / 30) * s);
             ctx.moveTo(-30, 0);
             ctx.lineTo(120, 0);
             ctx.stroke();
             ctx.restore();
-    //                    在钟表中心绘制一个圆点.
+
+            //                    在钟表中心绘制一个圆点.
             ctx.beginPath();
             ctx.arc(0, 0, 10, 0, Math.PI * 2, true);
-            ctx.fillStyle = "yellow";
+            ctx.fillStyle = "red";
             ctx.fill();
             ctx.restore();
         };
-        
-        window.setInterval(function() {
+
+        window.setInterval(function () {
             init();
         }, 1000);
-        
+
     };
 </script>
 

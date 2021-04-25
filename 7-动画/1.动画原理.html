@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-动画</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: white;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <img src="./img/Canvas动画原理.jpg" alt="" />
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+    </canvas>
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        // 设置画布宽高
+        canvas.width = 600;
+        canvas.height = 600;
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
+
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】！！！
+         * 不然：样式会不生效！！！
+         **/
+
+        /**
+            * 动画驱动方法：
+
+            *  定时器：siId = setInterval(() => {}, interval);
+            *  清除定时器：clearInterval(siId);
+
+            *  延时器：stId = setTimeout(() => {}, timeout);
+            *  清除延时器：clearTimeout(stId)      
+
+            *  动画帧：rqId = requestAnimationFrame()
+            *  清除动画帧：cancelAnimationFrame(rqId);
+       
+        */
+
+        let i = 0;
+
+        function draw() {
+            const { width, height } = canvas;
+
+            context.fillStyle = "blue";
+            context.fillRect(0, 0, width, height);
+
+            //擦除画布
+            context.clearRect(i, i, width / 4, height / 4);
+
+            i < 800 ? i += 10 : i = 0;
+
+        }
+
+        // setInterval(, 60);
+        // setInterval(() => {
+        //     draw();
+        // }, 60);
+
+        !(function render() {
+            draw();
+            requestAnimationFrame(render);
+        })();
+
+
+
+
+
+
+
+        // 性能测试
+        let [a, b] = [0, 0];
+
+        setInterval(() => {
+            // setInterval如果没有终止条件就会一直执行，直到关闭浏览器为止！！
+            a++;
+        }, 100);
+
+        !(function render2() {
+            // requestAnimationFrame只有在浏览器标签处于激活状态下，才会执行！！
+            b++;
+            requestAnimationFrame(render2);
+        })();
+
+        window.addEventListener('visibilitychange', () => {
+            console.log('浏览器标签状态：', document.visibilityState);
+            console.log('setInterval：', a);
+            console.log('requestAnimationFrame：', b);
+        });
+
+    </script>
+</body>
+
+</html>

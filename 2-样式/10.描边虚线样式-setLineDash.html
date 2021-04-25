@@ -78,8 +78,7 @@
         context.lineTo(750, 100);
         context.stroke();
 
-
-
+        context.save();
         context.lineWidth = 10;
         context.strokeStyle = 'green';
         context.lineCap = 'butt';  // 默认无角端点；
@@ -90,7 +89,7 @@
         context.moveTo(50, 200);
         context.lineTo(750, 200);
         context.stroke();
-
+        context.restore();
 
 
         context.save();
