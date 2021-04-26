@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-动画</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: white;
+            border: 1px solid gray;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <img src="./img/补间动画.jpg" alt="" />
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+    </canvas>
+
+    <script src="./js/d3-color.js"></script>
+    <!-- <script src="./js/Tween.js"></script> -->
+    <script src="./js/SupTween.js"></script>
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        // 设置画布宽高
+        canvas.width = 800;
+        canvas.height = 800;
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
+
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】！！！
+         * 不然：样式会不生效！！！
+         **/
+
+        /**
+            * 动画驱动方法：
+
+            *  定时器：siId = setInterval(() => {}, interval);
+            *  清除定时器：clearInterval(siId);
+
+            *  延时器：stId = setTimeout(() => {}, timeout);
+            *  清除延时器：clearTimeout(stId)      
+
+            *  动画帧：rqId = requestAnimationFrame()
+            *  清除动画帧：cancelAnimationFrame(rqId);
+       
+        */
+
+        // 小球对象
+        class Ball {
+            constructor(r = 30, color = '#000') {
+                // 小球半径
+                this.r = r;
+                // x坐标
+                this.x = 0;
+                // y坐标
+                this.y = 0;
+                // 颜色
+                this.color = color;
+            };
+
+            draw(context) {
+                const { x, y, r, color } = this;
+
+                context.clearRect(0, 0, canvas.width, canvas.height);
+
+                context.save();
+                context.beginPath();
+                context.fillStyle = color;
+                context.arc(x, y, r, 0, Math.PI * 2, false);
+                context.fill();
+                context.restore();
+
+            };
+        };
+
+        const ball = new Ball(50, 'blue');
+        // ball.x = canvas.width / 2;
+        // ball.y = 50;
+
+
+        /**
+         * tween.js是一款可生成平滑动画效果的js动画库
+         * http://www.htmleaf.com/jQuery/Layout-Interface/201501271284.html
+        */
+        const tween = new TWEEN.Tween(ball);
+
+        // 告诉补间动画我们要在1000毫秒内对y属性进行动画处理方法：to({key: val}, 时间)
+        // tween.to({ x: 800, y: 800 }, 1000);
+        tween.to({ color: 'green', x: 800, y: 800 }, 2000);
+
+        // 开始动画
+        tween.start();
+
+        // 重复次数据 repeat(Infinity) 无数次
+        tween.repeat(Infinity);
+
+        // 悠悠球反弹效果
+        tween.yoyo(true);
+
+        // 重力 设置插值easing()
+        tween.easing(TWEEN.Easing.Bounce.Out);
+
+        // 事件监听 onStart, onStop, onUpdate, onComplete
+        tween.onUpdate(function () {
+            // console.log('监听update事件', this);
+        });
+
+        !(function render() {
+            TWEEN.update();
+            ball.draw(context);
+            requestAnimationFrame(render);
+        })();
+
+    </script>
+</body>
+
+</html>

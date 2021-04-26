@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>粒子发射器</title>
+    <style>
+        body{margin: 0;overflow: hidden}
+    </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+    const canvas=document.getElementById('canvas');
+    const [width,height]=[window.innerWidth,window.innerHeight];
+    canvas.width=width;
+    canvas.height=height;
+    const  ctx=canvas.getContext('2d');
+
+
+    //所有粒子的边界
+    const edge={left:0,right:width,bottom:height-50};
+
+    /*图像源*/
+    const imgGun=new Image();
+    imgGun.src='./images/gun.png';
+    const imgPart=new Image();
+    imgPart.src='./images/part.png';
+
+
+    /*粒子对象*/
+    class Particle{
+        constructor(img) {
+            //图像源
+            this.img=img;
+            //位置
+            this.pos = {x: 0, y: 0};
+            //1：新生，0：坠落
+            this.state=1;
+            //父级
+            this.parent = null;
+
+            //速度
+            this.vx=this.getVx();
+            this.vy=0.002;
+            //重力
+            this.gravity=0.002;
+            //弹力
+            this.bounce=-0.85;
+        }
+        //获取x 轴的速度，避免直上直下的弹动
+        //vx 取值范围是[-0.5,0.5]，但不能在[-0.15,0.15] 之间
+        getVx(){
+            let vx=Math.random()*1-0.5;
+            if (Math.abs(vx)<0.15) {
+                return this.getVx();
+            }else{
+                return vx;
+            }
+        }
+        //更新数据
+        update(diff){
+            //解构状态、尺寸和位置
+            const {state,pos,img:{width,height}}=this;
+            //解构边界
+            const {left,right,bottom}=edge;
+            if (!state){
+                //如果粒子的状态为坠落状态
+                this.vy+=this.gravity*diff;
+                //设置粒子位置
+                pos.y+=this.vy*diff;
+                pos.x+=this.vx*diff;
+                //底部碰撞检测
+                if(pos.y+height>bottom){
+                    //将粒子位置调整到底部边界之上
+                    pos.y=bottom-height;
+                    //y 值反弹
+                    this.vy *= this.bounce;
+                }
+                //左右碰撞检测
+                if (pos.x+width<left||pos.x>right){
+                    //将此元素从父对象的数组中删除
+                    this.parent.remove(this);
+                }
+            }
+        }
+        //绘图方法
+        draw(ctx){
+            //解构位置、尺寸
+            const {pos:{x,y},parent:{imgPart}}=this;
+            ctx.save();
+            //变换坐标系位置
+            ctx.translate(x,y);
+            //绘图
+            ctx.drawImage(imgPart,0,0);
+            ctx.restore();
+        }
+    }
+    /*粒子粒子发射器*/
+    class Gun{
+        constructor(imgGun,imgPart) {
+            //枪图
+            this.imgGun=imgGun;
+            //子弹图
+            this.imgPart=imgPart;
+            //位置
+            this.pos={x:0,y:0};
+            //状态 1：粒子发射器的枪膛中有粒子；0：粒子发射器的枪膛中没有粒子。默认没有粒子。
+            this._state=0;
+            //粒子库
+            this.children=[];
+        }
+        get state(){
+            return this._state;
+        }
+        set state(val){
+            //在为state 赋值时，做简单的diff 判断
+            if(this._state!==val){
+                if(val){
+                    //制造一个粒子
+                    this.createParticle();
+                }else{
+
+                    //粒子仓库中的第一个粒子发射
+                    this.children[0].state=0;
+                }
+                this._state=val;
+            }
+        }
+        /*新建粒子*/
+        createParticle(){
+            const {pos:{x,y},imgPart,children}=this;
+            //实例化粒子对象
+            const part=new Particle(imgPart);
+            //粒子位置
+            part.pos={x:x+38,y:y+32};
+            //粒子父级
+            part.parent=this;
+            //粒子状态 1：粒子发射器中要有粒子
+            part.state = 1;
+            //将粒子以前置的方式添加到粒子仓库里
+            children.unshift(part);
+        }
+        /*删除粒子
+        * ele 粒子对象
+        * */
+        remove(ele){
+            const {children}=this;
+            const index = children.indexOf(ele);
+            if (index!==-1) {
+                children.splice(index, 1);
+            }
+        }
+        /*更新
+        * diff：以毫秒为单位的时间差
+        */
+        update(diff){
+            //遍历粒子仓库中的所有粒子
+            this.children.forEach((ele)=>{
+                //更新粒子
+                ele.update(diff);
+            })
+        }
+        //绘制辅助线
+        draw(ctx){
+            const {pos:{x,y},imgGun,children}=this;
+            ctx.save();
+            //变换坐标系位置
+            ctx.translate(x,y);
+            //绘图 - 枪
+            ctx.drawImage(imgGun,0,0);
+            ctx.restore();
+        }
+    }
+
+    const gun=new Gun(imgGun,imgPart);
+    gun.pos.x=width/2-80;
+    gun.pos.y=50;
+    gun.state=1;
+
+    setInterval(function(){
+        gun.state=Math.round(Math.random());
+        // gun.state=0;
+        console.log(gun.state)
+    },100)
+
+    /*计时器*/
+    let time=new Date();
+
+    render();
+    function render(){
+        const now=new Date();
+        const diff=now-time;
+        time=now;
+        gun.update(diff);
+        //清理画布
+        ctx.clearRect(0,0,width,height)
+        gun.draw(ctx);
+        gun.children.forEach((ele)=>{
+            ele.draw(ctx);
+        })
+        //请求动画帧
+        requestAnimationFrame(render);
+    }
+
+
+</script>
+</body>
+</html>
