@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-事件</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: navy;
+            border: 1px solid gray;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <img src="./img/基本图形选择方法.jpg" alt="" />
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+    </canvas>
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        // 设置画布宽高
+        canvas.width = 800;
+        canvas.height = 600;
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
+
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】！！！
+         * 不然：样式会不生效！！！
+         **/
+
+        /**
+            * 方法：
+            * canvas 图形没有监听事件的方法。比如用鼠标选择图形时，我们只能用canvas 画布监听事件，获取鼠标或触摸点在canvas 中的位置，
+            * 再基于图形在canvas 中的位置和形状，判断鼠标在canvas中的点位是否在图形中。
+
+            
+            // 获取canvas 中鼠标位置的方法
+            canvas.addEventListener('mousedown', getPos);
+            function getPos(event) {
+                const { clientX, clientY } = event;
+                const { left, top } = canvas.getBoundingClientRect();
+                const [x, y] = [clientX - left, clientY - top];
+            };
+
+            // 获取触摸点点位的方法
+            canvas.addEventListener('mousedown', getPos);
+            function getPos(event) {
+                const { pageX, pageY } = event.changedTouches[0];
+                const { left, top } = canvas.getBoundingClientRect();
+                const [x, y] = [pageX - left, pageY - top];
+                console.log(x, y);
+            };
+        */
+
+        // 圆形对象类
+        class RoundShape {
+            constructor(radius = 0, color = 'white') {
+                this.color = color;
+                this.radius = radius;
+                this.x = 0;
+                this.y = 0;
+            };
+            draw() {
+                const { x, y, color, radius } = this;
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.save();
+                context.fillStyle = color;
+                context.beginPath();
+                context.arc(x, y, radius, 0, Math.PI * 2, false);
+                context.fillText(`圆形左上角：坐标X：${x},  坐标Y：${y}`, canvas.width / 2 - 80, canvas.height / 2, canvas.width);
+                context.fill();
+                context.restore();
+            };
+        };
+
+        // 获取鼠标在Canvas画布中的位置
+        function getMousePos(event) {
+            // 获取鼠标位置
+            const { clientX, clientY } = event;
+
+            // 获取Canvas画布的边界 // 核心方法：getBoundingClientRect()  https://developer.mozilla.org/zh-CN/docs/Web/API/Element/getBoundingClientRect
+            const { left, top } = canvas.getBoundingClientRect();
+
+            //计算鼠标在canvas 中的位置
+            const x = clientX - left;
+            const y = clientY - top;
+            return { x, y };
+        };
+
+        // 判断鼠标是否点在图形中
+        function isInGraph(round, diffPos) {
+            // 圆形半径
+            const { radius } = round;
+
+            //解构图形位置和差值
+            const { x, y } = diffPos;
+
+            // 获取鼠标到圆心的距离 sqrt
+            const sqrt = Math.sqrt(x * x + y * y); //返回一个数的平方根。
+  
+            // 判断鼠标到圆的中心距离是否小于radius(圆的半径)
+            return radius > sqrt;
+        };
+
+        // 获取差值：鼠标位 减去 图形位
+        let diffPos = null;
+
+        // 图形是否被选择
+        let selected = false;
+
+        // 鼠标按下事件
+        canvas.addEventListener('mousedown', function (event) {
+            // 获取鼠标在Canvas画布中的位置
+            const mpos = getMousePos(event);
+
+            // 获取差值：鼠标位 减去 图形位
+            diffPos = {
+                x: mpos.x - round.x,
+                y: mpos.y - round.y
+            };
+
+            // 判断鼠标是否点在图形中
+            selected = isInGraph(round, diffPos);
+            console.log('鼠标是否点在图形中：', selected);
+        }, false);
+
+        // 鼠标移动事件
+        canvas.addEventListener('mousemove', function (event) {
+            // 获取鼠标在Canvas画布中的位置
+            const mpos = getMousePos(event);
+
+            // 如果鼠标选择了图形，让图形跟着鼠标动，按需渲染            
+            if (selected) {
+                round.x = mpos.x - diffPos.x;
+                round.y = mpos.y - diffPos.y;
+                canvas.style.cursor = 'move';
+                round.draw();
+            }
+        }, false);
+
+        // 鼠标抬起事件
+        canvas.addEventListener('mouseup', function (event) {
+            selected = false;
+            canvas.style.cursor = 'initial';
+        }, false);
+
+        // 实例化圆形对象
+        const round = new RoundShape(100, 'yellow');
+        round.x = 100;
+        round.y = 100;
+
+        // 绘制矩形
+        round.draw();
+
+    </script>
+</body>
+
+</html>
