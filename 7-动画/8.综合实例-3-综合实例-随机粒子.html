@@ -107,9 +107,9 @@
 			ctx.beginPath();
 			ctx.fillStyle = arr[i].bg;
 			ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-
+			ctx.shadowBlur = 10;        // 投影模糊度
+			ctx.shadowColor = 'white';   // 投影颜色
 			ctx.arc(arr[i].cx, arr[i].cy, arr[i].re, 0, (2 * Math.PI)); //圆中心x坐标，圆中心y坐标，圆半径大小，起始角(弧度)，结束角(弧度)，逆时针(false)
-
 			ctx.fill();
 			ctx.stroke();
 		};
