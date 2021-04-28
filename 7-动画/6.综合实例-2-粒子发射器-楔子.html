@@ -16,6 +16,12 @@
     canvas.height=height;
     const  ctx=canvas.getContext('2d');
 
+    /**
+     * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
+     * 
+     * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
+     **/
+
 
     //所有粒子的边界
     const edge={left:0,right:width,bottom:height-50};

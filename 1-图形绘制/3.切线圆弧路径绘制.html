@@ -43,8 +43,9 @@
         const ctx = canvas.getContext('2d');
 
         /**
-         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】！！！
-         * 不然：样式会不生效！！！
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
+         * 
+         * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
          **/
 
         /**
@@ -92,9 +93,9 @@
         ctx.beginPath();
         ctx.moveTo(100, 100); // 路径绘制起点
         ctx.arcTo(
-            500, 100, 
-            500, 200, 
-        100);
+            500, 100,
+            500, 200,
+            100);
         ctx.lineWidth = 2;// 边框宽度
         ctx.setLineDash([0, 0]);
         ctx.strokeStyle = 'blue';// 边框色

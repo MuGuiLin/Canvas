@@ -17,7 +17,7 @@
 
 		canvas {
 			border: 1px solid gray;
-			background: black;
+			background: url(./img/void.jpg);
 			position: relative;
 			z-index: 0;
 			cursor: crosshair;
@@ -25,37 +25,55 @@
 
 		.tool {
 			padding: 20px;
+			padding-top: 0;
 			display: flex;
 			flex-direction: column;
+			border: 1px solid #666;
+		}
+
+		.color,
+		.range,
+		.file,
+		.btn {
+			margin: 2px 0;
+			width: 150px;
+			height: 30px;
+			font-size: 16px;
+			border: 1px solid #b2b2b2;
+			cursor: pointer;
+		}
+
+		.file {
+			font-size: 18px;
 		}
 	</style>
 </head>
 
 <body>
-	<h1>Canvas画笔工具</h1>
+	<h1>Canvas 画笔工具</h1>
 	<hr />
 	<section>
-		<canvas id="canvas" width="800px" height="500px"></canvas>
+		<canvas id="canvas" width="800px" height="600px"></canvas>
 		<div class="tool">
-
 			<h4>颜色：</h4>
-			<button onclick="colorFn('red')">红色</button>
-			<button onclick="colorFn('green')">绿色</button>
-			<button onclick="colorFn('blue')">蓝色</button>
+			<input type="color" value="#ffffff" oninput="colorFn(this)" class="color" />
 
 			<h4>粗细：</h4>
-			<input type="range" value="1" oninput="rangeFn(this)" max="10" />
+			<input type="range" value="1" oninput="rangeFn(this)" max="10" class="range" />
+
+			<h4>图像：</h4>
+			<input type="file" onchange="fileFn(event)" class="file" single accept="image/*" />
 
 			<h4>擦除：</h4>
-			<button onclick="penFn()">画笔</button>
-			<button onclick="clearFn(1)">橡皮擦</button>
-			<button onclick="clearFn()">清空</button>
+			<button type="button" onclick="penFn()" class="btn">画 笔</button>
+			<button type="button" onclick="clearFn(1)" class="btn">橡皮擦</button>
+			<button type="button" onclick="clearFn()" class="btn">清 空</button>
 
 
-			<h4>保存：</h4>
-			<button onclick="saveFn('base64')">Base64</button>
-			<button onclick="saveFn('png')">JNG</button>
-			<button onclick="saveFn('image/jpeg')">JPG/JPEG</button>
+			<h4>下载：</h4>
+			<button type="button" onclick="saveFn('base64')" class="btn">Base64</button>
+			<button type="button" onclick="saveFn('png')" class="btn">JNG</button>
+			<button type="button" onclick="saveFn('image/jpeg')" class="btn">JPG/JPEG</button>
 		</div>
 	</section>
 
@@ -65,6 +83,12 @@
 		ctx = cvs.getContext('2d');
 	pen = 'white';
 	line = 1;
+
+	/**
+	 * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
+	 * 
+	 * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
+	 **/
 
 	cvs.onmousedown = function (e) {
 		var e = e || window.event;
@@ -94,8 +118,33 @@
 		ctx.stroke();
 	};
 
-	function colorFn(cor) {
-		pen = cor;
+	function colorFn(obj) {
+		pen = obj.value;
+	};
+
+	function fileFn(ev) {
+		// JS获取CSS样式的方法
+		// console.log(dom.currentStyle['width'] ); 
+		// console.log(getComputedStyle(dom, null)['width']); 
+		const event = ev || window.event, file = event.target.files[0] || event.dataTransfer.files[0];
+		const createObjectURL = window.createObjectURL || window.URL.createObjectURL || window.webkitURL.createObjectUR;
+		const img = new Image();
+		img.src = createObjectURL(file);
+		img.onload = function (e) {
+			ctx.clearRect(0, 0, cvs.width, cvs.height);
+			cvs.width = img.width;
+			cvs.height = img.height;
+			ctx.drawImage(img, 0, 0, img.width, img.height);
+		};
+		// const fr = new FileReader();
+		// fr.readAsDataURL(file); // Base64 8Bit字节码
+		// fr.readAsBinaryString(file);  // Binary 原始二进制
+		// fr.readAsArrayBuffer(file);   // ArrayBuffer 文件流
+		// fr.onload = function (e) {
+		// 	console.log(e.target.result);
+		// 	console.log(fr);
+		// 	ctx.drawImage(fr, 0, 0, cvs.width, cvs.height);
+		// };
 	};
 
 	function rangeFn(obj) {
@@ -106,19 +155,19 @@
 		if (xpc) {
 			cvs.onmousedown = function (e) {
 				var e = e || window.event;
-
 				document.onmousemove = function () {
 					var e = e || window.event;
 					ctx.clearRect(e.clientX - cvs.offsetLeft + -5, e.clientY - cvs.offsetTop + -5, 10, 10);
 				};
-
 				document.onmouseup = function () {
 					document.onmousemove = null;
 					document.onmouseup = null;
 				};
 			};
 		} else {
-			ctx.clearRect(0, 0, cvs.width, cvs.height);
+			if (confirm('清除后无法恢复哦！您确定要清空画布吗？')) {
+				ctx.clearRect(0, 0, cvs.width, cvs.height);
+			}
 		}
 	};
 
