@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden
+        }
+
+        #audio {
+            position: absolute;
+            left: 20px;
+            bottom: 20px;
+            opacity: 0;
+            transition: opacity 200ms;
+            z-index: 20;
+        }
+
+        #audio:hover {
+            opacity: 90%;
+        }
+
+        #vid {
+            position: absolute;
+            visibility: hidden;
+        }
+
+        #imgL {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: url("./img/imgL.png");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: left;
+        }
+
+        #imgR {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: url("./img/imgR.png");
+            background-size: cover;
+            background-position: right;
+        }
+
+        #canvas {
+            background-image: url("./img/back.jpg");
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <audio id="audio" controls loop autoplay>
+        <source src="./audio/过年啦.mp3" type="audio/mpeg">
+    </audio>
+    <video id="vid" src="./img/firework.mp4" autoplay loop muted></video>
+    <div id="imgL"></div>
+    <div id="imgR"></div>
+    <canvas id="canvas"></canvas>
+
+    <script src="./js/Tween.js"></script>
+    <script>
+        //窗口尺寸
+        const [width, height] = [window.innerWidth, window.innerHeight];
+        //视频
+        const vid = document.getElementById('vid');
+        //获取canvas
+        const canvas = document.getElementById('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        //获取上下文对象
+        const ctx = canvas.getContext('2d');
+
+        /*图像源*/
+        const imgC = new Image();
+        imgC.src = './img/cloud.png';
+        const clouds = [
+            { pos: { x: width, y: height - 350 }, scale: 0.6 },
+            { pos: { x: width * 0.3, y: height - 200 }, scale: 0.6 },
+            { pos: { x: width + 200, y: height - 330 }, scale: 0.7 },
+            { pos: { x: width - 200, y: height - 220 }, scale: 0.8 },
+            { pos: { x: width - 400, y: height - 320 }, scale: 1 },
+            { pos: { x: width * 0.1, y: height - 310 }, scale: 1 },
+        ];
+
+        //速度
+        const vx = 0.02;
+        //计时器
+        let time = new Date();
+
+        /*视频事件：
+        * 视频播放 play
+        * */
+        vid.addEventListener('play', function () {
+            render();
+        });
+
+        function draw() {
+            const text = '过年啦！'
+            const [tx, ty] = [(width - 920) / 2, (height - 250) / 4];
+
+            ctx.save();
+
+            //文字样式
+            ctx.font = 'bold 270px Arial';
+            ctx.textBaseline = 'top';
+
+            /*-----视频与填充文字合成------*/
+            ctx.save();
+            ctx.translate(tx, ty);
+            //填充文字
+            ctx.fillText(text, 0, 0);
+            ctx.globalCompositeOperation = 'source-in';
+            ctx.drawImage(vid, 0, -180, 920, 540);
+            ctx.restore();
+
+            /*-----描边文字------*/
+            ctx.save();
+            ctx.translate(tx, ty);
+            //投影
+            ctx.shadowColor = 'rgba(0,0,0,0.6)';
+            ctx.shadowOffsetY = 2;
+            ctx.shadowBlur = 4;
+            //渐变色
+            const pt = ctx.createLinearGradient(0, 250, 0, 0);
+            pt.addColorStop(0, '#f7d495');
+            pt.addColorStop(0.53, '#cc904f');
+            pt.addColorStop(0.56, '#fbe1b9');
+            pt.addColorStop(0.64, '#f5d192');
+            pt.addColorStop(1, '#ce9555');
+            //绘制描边文字
+            ctx.strokeStyle = pt;
+            ctx.lineWidth = 6;
+            ctx.strokeText(text, 0, 0);
+            ctx.restore();
+
+            /*-----白云------*/
+            clouds.forEach((ele) => {
+                const { pos, scale } = ele;
+                ctx.drawImage(imgC, pos.x, pos.y, imgC.width * scale, imgC.height * scale);
+                if (pos.x < -400) {
+                    pos.x = width;
+                }
+            });
+            ctx.restore();
+        };
+
+        function render() {
+            //计算时间差
+            const now = new Date();
+            const diff = now - time;
+            time = now;
+
+            //动画
+            const dist = vx * diff;
+            clouds.forEach((ele) => {
+                ele.pos.x -= dist * ele.scale;
+            });
+            ctx.clearRect(0, 0, width, height);
+            draw();
+            requestAnimationFrame(render);
+        };
+    </script>
+</body>
+
+</html>

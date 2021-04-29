@@ -22,100 +22,125 @@
 <body>
     <h1>canvas时钟</h1>
     <hr>
-    <canvas id="c1" width="300" height="300"></canvas>
+    <canvas id="c1" width="400" height="400"></canvas>
 </body>
 
 <script>
-    window.onload = function () {
-        var oC = document.getElementById('c1');
-        var ctx = oC.getContext('2d');
 
-        /**
-         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
-         * 
-         * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
-         **/
+    /**
+     * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
+     * 
+     * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
+     **/
 
-        init(); //此处先引用函数是为了防止加载完页面的第一秒有空白画面。
-        function init() {
-            ctx.save();
-            ctx.clearRect(0, 0, 300, 300);
-            ctx.translate(150, 150);
-            ctx.rotate(-Math.PI / 2);
-            ctx.lineWidth = 6;
-            ctx.strokeStyle = "blue";
-            ctx.lineCap = "round";
-            for (var i = 0; i < 12; i++) {
-                ctx.beginPath();
-                ctx.rotate(Math.PI / 6);
-                ctx.moveTo(100, 0);
-                ctx.lineTo(120, 0);
-                ctx.stroke();
-            }
-            for (var k = 0; k < 60; k++) {
-                ctx.strokeStyle = "red";
-                ctx.beginPath();
-                ctx.rotate(Math.PI / 30);
-                ctx.moveTo(118, 0);
-                ctx.lineTo(120, 0);
-                ctx.stroke();
-            }
-            var time = new Date();
-            var s = time.getSeconds();
-            var m = time.getMinutes();
-            var h = time.getHours();
-            if (h > 12) {
-                h -= 12;
-            }
-            //                    时针的角度=360/12*小时+360/12/60分钟+360/12/60/60秒;
-            //                    换算成弧度
-            //                    时针的弧度= π/6*小时+π/360*分钟+π/2160*秒
-            ctx.save();
-            ctx.lineWidth = 9;
-            ctx.strokeStyle = "blue";
-            ctx.beginPath();
-            ctx.rotate(h * (Math.PI / 6) + (Math.PI / 360) * m + (Math.PI / 21600) * s);
-            ctx.moveTo(-20, 0);
-            ctx.lineTo(80, 0);
-            ctx.stroke();
-            ctx.restore();
+    function oCan() {
+        var circleX = 200;
+        var circleY = 200;
+        var circleR = 150;
+        var oPI = Math.PI / 180;
 
-            //                    分针的角度=360/60*分钟+360/60/60*秒
-            //                    分针的弧度 =π/30*分钟+π/1800*秒
-            ctx.save();
-            ctx.lineWidth = 7;
-            ctx.strokeStyle = "green";
-            ctx.beginPath();
-            ctx.rotate((Math.PI / 30) * m + (Math.PI / 1800) * s);
-            ctx.moveTo(-20, 0);
-            ctx.lineTo(112, 0);
-            ctx.stroke();
-            ctx.restore();
+        var oc = document.getElementById("c1");
+        var ogc = oc.getContext("2d");
+        ogc.clearRect(0, 0, circleX, circleY); //清空画布
+        ogc.beginPath();
+        /*画分针刻度*/
 
-            //                    秒针的角度=360/60*秒
-            //                    秒针的弧度 =π/30*秒
-            ctx.save();
-            ctx.lineWidth = 6;
-            ctx.beginPath();
-            ctx.rotate((Math.PI / 30) * s);
-            ctx.moveTo(-30, 0);
-            ctx.lineTo(120, 0);
-            ctx.stroke();
-            ctx.restore();
+        for (var i = 0; i < 60; i++) {
+            ogc.moveTo(circleX, circleY);
+            ogc.arc(circleX, circleY, circleR, 6 * oPI * i, 6 * oPI * (i + 1), false);
+        }
+        ogc.closePath();
+        ogc.stroke();
 
-            //                    在钟表中心绘制一个圆点.
-            ctx.beginPath();
-            ctx.arc(0, 0, 10, 0, Math.PI * 2, true);
-            ctx.fillStyle = "red";
-            ctx.fill();
-            ctx.restore();
-        };
+        //画一个白色实心圆盖住其他的线，使其出来分针刻度线
+        ogc.beginPath();
+        ogc.fillStyle = "#fff";
+        ogc.arc(circleX, circleY, circleR * 19 / 20, 0, 360 * oPI, false);
+        ogc.closePath();
+        ogc.fill();
+        //ogc.stroke();//为什么注释，会出现黑框
 
-        window.setInterval(function () {
-            init();
-        }, 1000);
+        /*画时针刻度*/
+        ogc.beginPath();
+        ogc.lineWidth = 3;
+        for (var i = 0; i < 12; i++) {
+            ogc.moveTo(circleX, circleY);
+            ogc.arc(circleX, circleY, circleR, 30 * oPI * i, 30 * oPI * (i + 1), false);
+        }
+        ogc.closePath();
+        ogc.stroke();
 
+        //画一个白色实心圆盖住其他的线，使其出来时针刻度线
+        ogc.beginPath();
+        ogc.fillStyle = "#fff";
+        ogc.arc(circleX, circleY, circleR * 18 / 20, 0, 360 * oPI, false);
+        ogc.closePath();
+        ogc.fill();
+
+        /*求当前时间*/
+        var oDate = new Date();
+        var oHours = oDate.getHours();
+        var oMin = oDate.getMinutes();
+        var oSec = oDate.getSeconds();
+
+        /*把时间转换成弧度*/
+        var oHoursValues = (-90 + oHours * 30) * oPI;
+        var oMinValues = (-90 + oMin * 6) * oPI;
+        var oSecValues = (-90 + oSec * 6) * oPI;
+
+        /*画时针*/
+        ogc.beginPath();
+        ogc.lineWidth = 5;
+        ogc.moveTo(circleX, circleY);
+        ogc.arc(circleX, circleY, circleR * 8 / 20, oHoursValues, oHoursValues, false);
+        ogc.closePath();
+        ogc.fill();
+        ogc.stroke();
+
+        /*画分针*/
+        ogc.beginPath();
+        ogc.lineWidth = 3;
+        ogc.moveTo(circleX, circleY);
+        ogc.arc(circleX, circleY, circleR * 12 / 20, oMinValues, oMinValues, false);
+        ogc.closePath();
+        ogc.fill();
+        ogc.stroke();
+
+        /*画秒针*/
+        ogc.beginPath();
+        ogc.lineWidth = 1;
+        ogc.moveTo(circleX, circleY);
+        ogc.arc(circleX, circleY, circleR * 15 / 20, oSecValues, oSecValues, false);
+        ogc.closePath();
+        ogc.fill();
+        ogc.stroke();
+
+        //画数字
+        var deg = 2 * Math.PI / 12; //弧度=角度*Math.PI/180;
+        ogc.save();
+        ogc.beginPath();
+        ogc.translate(circleX, circleY);
+        for (var i = 1; i < 13; i++) {
+            var x1 = Math.sin(i * deg); //正弦
+            var y1 = -Math.cos(i * deg); //余弦
+            ogc.fillStyle = "black"; //字体颜色
+            ogc.font = "bold 30px Calibri"; //字体
+            ogc.textAlign = 'center';
+            ogc.textBaseline = 'middle';
+            ogc.fillText(i, x1 * (circleR * 3 / 4), y1 * (circleR * 3 / 4)); //填充 125这个值越大 越显示在圆外面
+        }
+        ogc.closePath();
+        ogc.restore();
     };
+
+    // window.onload = function () {
+    //     setInterval(oCan, 1000); //毫秒
+    // };
+
+    !(function render() {
+        oCan();
+        requestAnimationFrame(render);
+    })();
 </script>
 
 </html>

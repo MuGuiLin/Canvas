@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>鼠标在canvas中的位置</title>
+    <style>
+        body {
+            margin: 0
+        }
+
+        #canvas {
+            margin: 50px;
+			/* width: 100px;
+            height: 100px; */
+			/* background-color: indigo; */
+			border: 1px solid gray;
+
+			/*点击穿透*/
+			/* pointer-events: none; */
+		}
+    </style>
+</head>
+
+<body>
+
+    <canvas id="canvas" width="600" height="400">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+    </canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.addEventListener('mousedown', getPos);
+        function getPos(event) {
+            /*鼠标在窗口中的位置 clientX,clientY*/
+            const { clientX, clientY } = event;
+
+            /*获取canvas在窗口中的位置left,to，使用getBoundingClientRect 方法*/
+            const { left, top } = canvas.getBoundingClientRect();
+
+            /*鼠标在canvas 中的位置=鼠标在窗口轴的位置减去canvas 在窗口中的位置*/
+            const [x, y] = [clientX - left, clientY - top];
+
+            ctx.save();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.lineWidth = 3;
+            ctx.font = '30px sans-serif';
+            ctx.strokeStyle = 'blue';
+            ctx.strokeText(`x:${x}，y:${y}`, canvas.width / 3, canvas.height / 2, canvas.width);
+            ctx.stroke();
+            ctx.restore();
+
+            console.log(x, y);
+        };
+
+    </script>
+</body>
+
+</html>

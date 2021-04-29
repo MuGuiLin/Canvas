@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>粒子时钟</title>
+    <style>
+        body{margin: 0;overflow: hidden}
+    </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+    const [width,height]=[window.innerWidth,window.innerHeight];
+    const canvas=document.getElementById('canvas');
+    canvas.width=width;
+    canvas.height=height;
+    const  ctx=canvas.getContext('2d');
+
+    /*2.声明钟表的基本数据*/
+    //钟表数字
+    const numDt=[
+        //0
+        [
+            1,1,1,1,
+            1,0,0,1,
+            1,0,0,1,
+            1,0,0,1,
+            1,0,0,1,
+            1,0,0,1,
+            1,1,1,1
+        ],
+        //1
+        [
+            0,0,0,1,
+            0,0,0,1,
+            0,0,0,1,
+            0,0,0,1,
+            0,0,0,1,
+            0,0,0,1,
+            0,0,0,1
+        ],
+        //2
+        [
+            1,1,1,1,
+            0,0,0,1,
+            0,0,0,1,
+            1,1,1,1,
+            1,0,0,0,
+            1,0,0,0,
+            1,1,1,1
+        ],
+        //3
+        [
+            1,1,1,1,
+            0,0,0,1,
+            0,0,0,1,
+            1,1,1,1,
+            0,0,0,1,
+            0,0,0,1,
+            1,1,1,1
+        ],
+        //4
+        [
+            1,0,0,1,
+            1,0,0,1,
+            1,0,0,1,
+            1,1,1,1,
+            0,0,0,1,
+            0,0,0,1,
+            0,0,0,1
+        ],
+        //5
+        [
+            1,1,1,1,
+            1,0,0,0,
+            1,0,0,0,
+            1,1,1,1,
+            0,0,0,1,
+            0,0,0,1,
+            1,1,1,1
+        ],
+        //6
+        [
+            1,1,1,1,
+            1,0,0,0,
+            1,0,0,0,
+            1,1,1,1,
+            1,0,0,1,
+            1,0,0,1,
+            1,1,1,1
+        ],
+        //7
+        [
+            1,1,1,1,
+            0,0,0,1,
+            0,0,0,1,
+            0,0,0,1,
+            0,0,0,1,
+            0,0,0,1,
+            0,0,0,1
+        ],
+        //8
+        [
+            1,1,1,1,
+            1,0,0,1,
+            1,0,0,1,
+            1,1,1,1,
+            1,0,0,1,
+            1,0,0,1,
+            1,1,1,1
+        ],
+        //9
+        [
+            1,1,1,1,
+            1,0,0,1,
+            1,0,0,1,
+            1,1,1,1,
+            0,0,0,1,
+            0,0,0,1,
+            1,1,1,1
+        ],
+        //:
+        [
+            0,0,0,0,
+            0,0,0,0,
+            0,0,1,0,
+            0,0,0,0,
+            0,0,1,0,
+            0,0,0,0,
+            0,0,0,0
+        ],
+    ];
+    //项目数量
+    const itemNum=8;
+    //项目间隙的数量
+    const itemSpNum=itemNum-1;
+    //项目间隙的宽度
+    const itemSpace=24;
+    //粒子尺寸
+    const partSize=24;
+    //项目的列数，行数
+    const [itemColNum,itemRowNum]=[4,7];
+    //项目宽度
+    const itemWidth=partSize*itemColNum;
+    //时钟宽度
+    const clockWidth=itemWidth*itemNum+itemSpace*itemSpNum;
+    //时钟的高度
+    const clockHeight=partSize*itemRowNum;
+    //时钟的位置，放在屏幕中间
+    const clockPos={
+        x:(width-clockWidth)/2,
+        y:(height-clockHeight)/5
+    };
+
+    /*粒子粒子发射器*/
+    class Gun{
+        constructor(width,height) {
+            //尺寸
+            this.width=width;
+            this.height=height;
+            //位置
+            this.x=0;
+            this.y=0;
+            //状态 1：粒子发射器的枪膛中有粒子；0：粒子发射器的枪膛中没有粒子。默认没有粒子。
+            this.state=0;
+        }
+        //绘制辅助线
+        draw(ctx){
+            const {x,y,width,height,state}=this;
+            ctx.save();
+            ctx.strokeStyle='#aaa';
+            ctx.strokeRect(x,y,width,height);
+            if(state){
+                ctx.fillRect(x,y,width,height);
+            }
+            ctx.restore();
+        }
+    }
+    /*items 项目集合
+    * items=[项目,项目,项目,项目,项目,项目,项目,项目]，其中有8个项目
+    * 项目=[4*7=28个粒子发射器]
+    * 1个粒子发射器中有0个或多个粒子
+    * */
+    const items=[];
+    //建立八个项目
+    for(let i=0;i<itemNum;i++){
+        //建立项目
+        const item=[];
+        //当前项目x 位置
+        let curItemX=(itemWidth+itemSpace)*i+clockPos.x;
+        //建立粒子发射器。每个项目都是4列，7行，所以遍历列和行。
+        for (let y=0;y<itemRowNum;y++){
+            //发射器的y 位置
+            const eleY=partSize*y+clockPos.y;
+            //遍历列
+            for(let x=0;x<itemColNum;x++){
+                //粒子发射器的x 位置
+                const eleX=partSize*x+curItemX;
+                //实例粒子发射器对象
+                const gun=new Gun(partSize,partSize);
+                //设置粒子发射器的位置
+                gun.x=eleX;
+                gun.y=eleY;
+
+                //将粒子发射器添加到项目中
+                item.push(gun);
+            }
+        }
+        //将项目添加到项目集合里
+        items.push(item);
+    }
+
+
+    /*先示配代表了冒号的两个项目*/
+    fitNum(10,2);
+    fitNum(10,5);
+
+    /*基于时钟文字，修改项目中每个粒子发射器的状态的方法
+    * numInd 数字在numDt数据集合中的索引
+    * itemInd 项目在项目集合中的索引位置
+    * */
+    function fitNum(numInd,itemInd){
+        const item=items[itemInd];
+        numDt[numInd].forEach((ele,ind)=>{
+            item[ind].state=ele;
+        })
+    }
+
+    //渲染方法
+    !(function render(){
+        //获取时间差和时分秒
+        const {hour,minute,second}=updateTime();
+        //更新时钟的时间
+        updateClock(hour,minute,second);
+        //清理画布
+        ctx.clearRect(0,0,width,height);
+        //先渲染state 状态不为0 的元素
+        items.flat().forEach((ele)=>{
+            ele.draw(ctx);
+        });
+        //请求动画帧
+        requestAnimationFrame(render)
+    })();
+
+    /*更新时钟的时间：基于数组类型的时、分、秒更新时钟*/
+    function updateClock(hour,minute,second){
+        //匹配小时
+        fitNum(hour[0],0);
+        fitNum(hour[1],1);
+        //匹配分钟
+        fitNum(minute[0],3);
+        fitNum(minute[1],4);
+        //匹配秒
+        fitNum(second[0],6);
+        fitNum(second[1],7);
+    }
+    /*updateTime() 获取时、分、秒的方法
+    * 此处的时、分、秒是由两个数字组成的数组，如小时为1点=[0,1]，10点=[1,0]
+    * */
+    function updateTime(){
+        //获取时间差
+        const time=new Date();
+        //返回时间差和时、分、秒
+        return {
+            hour:parseTime(time.getHours()),
+            minute:parseTime(time.getMinutes()),
+            second:parseTime(time.getSeconds())
+        };
+    }
+    //解析时间,如30分钟，解析为[3,0]
+    function parseTime(t){
+        let arr;
+        if(t<10){
+            arr=[0,t];
+        }else{
+            const str=t.toString();
+            arr=[parseInt(str[0]),parseInt(str[1])]
+        }
+        return arr;
+    }
+
+
+
+
+</script>
+</body>
+</html>

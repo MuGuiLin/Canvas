@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+		}
+
+		.score {
+			text-align: center;
+			line-height: 32px;
+			font-size: 24px;
+			color: #0000FF;
+		}
+
+		.games {
+			position: relative;
+			margin: auto;
+			width: 600px;
+			height: 600px;
+			border: 1px solid gray;
+			overflow: hidden;
+		}
+
+		.square {
+			position: absolute;
+			width: 30px;
+			height: 30px;
+			background: #0000FF;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="score">100分</div>
+	<div class="games" id="games"></div>
+</body>
+
+<script>
+	window.onload = function () {
+		init();
+	};
+
+	var games,
+		timer = null,
+		sanke = [];
+	stepTime = 350,
+
+		squareType = {
+			head: { value: 0, url: 'blue' },
+			body: { value: 1, url: 'gray' }
+		},
+
+		snakeToward = {
+			down: { x: 0, y: 30 },
+			up: { x: 0, y: -30 },
+			left: { x: -30, y: 0 },
+			right: { x: 30, y: 0 }
+		}
+	nowToward = snakeToward.right;
+	function init() {
+		games = document.querySelector('#games');
+
+		createSanke();
+
+		run();
+
+		document.onkeydown = function (e) {
+			changeTwrod(e.keyCode)
+		};
+	};
+
+	function square(row, col, type) {
+		var square = document.createElement('div');
+		square.classList.add('square');
+		square.style.top = row * 30 + 'px';
+		square.style.left = col * 30 + 'px';
+		renderSquare(square, type);
+		games.appendChild(square);
+		return square;
+	}
+
+	function createSanke() {
+		var heade = square(0, 3, squareType.head);
+		var body1 = square(0, 2, squareType.body);
+		var body2 = square(0, 1, squareType.body);
+		var body3 = square(0, 0, squareType.body);
+		sanke = [heade, body1, body2, body3];
+	};
+
+	function renderSquare(square, type) {
+		square.style.background = type.url;
+		square.value = type.value;
+	};
+
+	function run() {
+		clearTimeout(timer);
+		timer = setTimeout(function () {
+			move();
+			run()
+		}, stepTime);
+	};
+
+	function move() {
+		var temp = sanke.pop(); //取出数组最后一位
+		// renderSquare(sanke[0], squareType.body);
+		// renderSquare(temp, squareType.head);
+		sanke.unshift(temp);
+
+		temp.style.left = temp.offsetLeft + nowToward.x + 'px';
+		temp.style.top = temp.offsetTop + nowToward.y + 'px';
+	};
+
+	function changeTwrod(code) {
+		if (code == 40) {
+			nowToward = snakeToward.down;
+		} else if (code == 38) {
+			nowToward = snakeToward.up;
+		} else if (code == 37) {
+			nowToward = snakeToward.left;
+		} else if (code == 39) {
+			nowToward = snakeToward.right;
+		} else {
+
+		}
+		// console.log(code);
+	};
+</script>
+
+</html>

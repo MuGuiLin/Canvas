@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-合成</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        .page {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            background: url(./img//wood.jpg);
+        }
+
+        /*咖啡豆*/
+        .rose {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 595px;
+            height: 568px;
+            background: url(./img/rose.png);
+        }
+
+        /*咖啡豆*/
+        .beans {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 580px;
+            height: 100vh;
+            background: url(./img/beans.png) no-repeat bottom right;
+            background-size: 100%;
+        }
+
+        .cup {
+            margin: auto;
+            padding: 200px 0;
+            width: 512px;
+            height: 442px;
+            user-select: none;
+        }
+
+        .cup img,
+        video,
+        canvas {
+            position: absolute;
+        }
+
+        .video {
+            /* https://developer.mozilla.org/zh-CN/docs/Web/CSS/mask-image */
+            mask-image: url(./img/fish.png);
+            -webkit-mask-image: url(./img/fish.png);
+            mask-size: 100%;
+            -webkit-mask-size: 100%;
+        }
+
+        #canvas {
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <section class="page">
+        <div class="rose"></div>
+        <div class="beans"></div>
+        <div class="cup">
+            <video src="./video/fish.mp4" class="video" loop muted autoplay></video>
+            <img src="./img/cup.png" alt="" />
+            <canvas id="canvas" width="300" height="150">
+                对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+                canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+                canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+            </canvas>
+        </div>
+    </section>
+
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        // 设置画布宽高
+        canvas.width = 512;
+        canvas.height = 442;
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
+
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
+         * 
+         * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
+         **/
+
+        /**
+            * 方法：
+            // 1、全局透明度合成
+            context.globalAlpha = alpha 0 到 1之间;
+
+            // 2、路径裁剪
+            context.clip();
+            
+            // 3、全局合成
+            context.globalCompositeOperation='source-over | copy | destination-in | destination-out | destination-over | lighter | source-atop | source-in | source-out | xor';
+           
+        */
+
+        /*
+    * 线对象 Line
+    *   ctx 上下文对象
+    *   drawing 是否正在绘图
+    *
+    *   鼠标按下 moveTo(x,y)
+    *       保存状态
+    *       设置全局合成属性globalCompositeOperation 为destination-out
+    *       绘制路径起点
+    *   鼠标移动 lineTo(x,y)
+    *       设置下一个点
+    *       并绘图
+    *   鼠标抬起
+    *       状态还原 restore()
+    * */
+        class Line {
+            constructor(ctx) {
+                this.ctx = ctx;
+                this.drawing = false;
+            }
+            moveTo(x, y) {
+                this.drawing = true;
+                const { ctx } = this;
+                ctx.save();
+                ctx.lineWidth = 120;
+                ctx.lineJoin = 'round';
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+            }
+            lineTo(x, y) {
+                const { ctx } = this;
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            }
+            restore() {
+                this.ctx.restore();
+                this.drawing = false;
+            }
+        };
+
+        //获取鼠标位置
+        function getMousePos(canvas, event) {
+            return getPos(canvas, event.clientX, event.clientY);
+        };
+
+        //获取触摸点位置
+        function getTouchPos(canvas, event) {
+            //获取鼠标位置
+            const { pageX, pageY } = event.changedTouches[0];
+            return getPos(canvas, pageX, pageY);
+        };
+        
+        //基于鼠标或触摸点的位置，获取鼠标在canvas 中的像素位
+        function getPos(canvas, px, py) {
+            //解构canvas的css 尺寸和画布尺寸
+            const { clientWidth, clientHeight, width, height } = canvas;
+            // console.log('css 尺寸', clientWidth, clientHeight);
+            // console.log('画布 尺寸', width, height);
+
+            //获取canvas 相对于窗口的css 位置
+            const { top, left } = canvas.getBoundingClientRect();
+            // console.log('canvas 相对于窗口的css 位置', top, left);
+
+            //鼠标在canvas 中的css位置 = 鼠标在窗口中的css 位置-canvas在窗口中的css 位置
+            const [cssX, cssY] = [px - left, py - top];
+            // console.log('鼠标在canvas 中的css位置', cssX, cssY);
+
+            //鼠标在canvas 中的百分位 = css位置/css尺寸
+            const [percentX, percentY] = [cssX / clientWidth, cssY / clientHeight];
+            // console.log('鼠标在canvas 中的百分位', percentX, percentY);
+
+            //鼠标在canvas 中的像素位 = 画布尺寸*位置的百分比
+            const [x, y] = [width * percentX, height * percentY];
+            // console.log('鼠标在canvas 中的像素位', x, y);
+
+            return { x, y };
+            // return {x:cssX,y:cssY};
+        };
+
+        window.addEventListener('load', function () {
+            const milk = new Image();
+            milk.src = './img/milk.png';
+            milk.onload = function (e) {
+                context.drawImage(e.target || milk, 0, 0);
+            };
+
+            /*实例化线对象 Line*/
+            const line = new Line(context);
+
+            /*监听鼠标按下事件*/
+            canvas.addEventListener('mousedown', function (event) {
+                if (event.buttons === 1) {
+                    const { x, y } = getMousePos(canvas, event);
+                    line.moveTo(x, y);
+                }
+            });
+            /*监听鼠标移动事件*/
+            canvas.addEventListener('mousemove', function (event) {
+                if (event.buttons === 1 && line.drawing) {
+                    const { x, y } = getMousePos(canvas, event);
+                    line.lineTo(x, y);
+                }
+            });
+            /*监听鼠标抬起事件*/
+            canvas.addEventListener('mouseup', function (event) {
+                if (event.buttons === 1) {
+                    line.restore();
+                }
+            });
+
+            /*移动端 - 触摸事件*/
+            canvas.addEventListener('touchstart', function (event) {
+                const { x, y } = getTouchPos(canvas, event);
+                line.moveTo(x, y);
+            });
+            canvas.addEventListener('touchmove', function (event) {
+                event.preventDefault();
+                const { x, y } = getTouchPos(canvas, event);
+                line.lineTo(x, y);
+            });
+            canvas.addEventListener('touchend', function () {
+                line.restore();
+            });
+
+        });
+
+    </script>
+</body>
+
+</html>

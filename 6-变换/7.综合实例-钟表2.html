@@ -2,46 +2,34 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HTML5-Canvas-变换</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>canvas时钟</title>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            /* overflow: hidden; */
+        h1 {
+            text-align: center;
         }
 
-        #canvas {
-            /* width: 100px;
-            height: 100px; */
-            background-color: indigo;
-
-            /*点击穿透*/
-            /* pointer-events: none; */
+        canvas {
+            display: block;
+            margin: auto;
+            border: 1px solid gray;
         }
     </style>
 </head>
 
 <body>
-    <img src="./img/钟表.jpg" alt="" />
-    <canvas id="canvas" width="300" height="150">
-        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
-        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
-        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
-    </canvas>
-    <script>
-        // 获取画布DOM
-        const canvas = document.querySelector('#canvas');
+    <h1>canvas时钟</h1>
+    <hr />
+    <canvas id="canvas" width="400" height="400"></canvas>
+</body>
+<script>
+    window.onload = function () {
 
-        // 设置画布宽高
-        canvas.width = 800;
-        canvas.height = 600;
 
-        // 获取画布上下文对象
-        const context = canvas.getContext('2d');
-
+        let oc = document.querySelector('#canvas'),
+            ctx = oc.getContext('2d');
 
         /**
          * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
@@ -49,325 +37,121 @@
          * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
          **/
 
+        //注：提示！！！
+        // 1、弧度  = 角度 * Math.PI / 180; 注：arc()方法的0度是从 时钟的正3点位置开始算的，所有 正的90度就是6点位置 负的90度就是12点的位置，正负180度都是9点位置
+        // 2、如需通过 arc() 来创建圆，请把起始角设置为 0，结束角设置为 2*Math.PI, 如：6点位置就是0.5*PI, 9点位置就是1*PI, 12点位置就是1.5*PI
+        // 3、请使用 stroke() 或 fill() 方法在画布上绘制实际的弧。
+        
 
-        /**
-            * 变换方法：变换的本质是对canvas【坐标系】的操作，所以注：会影响全局画布(所有绘制)！！
-
-            *  位移：context.translate(x, y); 
-            *  旋转：context.rotate(Math.PI / 180 * degree);
-            *  缩放：context.scale(x, y);
-            * 
-            *  相对变换矩阵：context.transform(a, b, c, d, e, f);
-            *  绝对变换矩阵：context.setTransform(a, b, c, d, e, f);
-            * 
-        */
-
-        const img = new Image();
-        img.src = './img/mat.jpg';
-
-
-
-
-        const r = Math.PI * 2; // 一周圆的弧度
-
-        // 根据当前时间获取指针弧度, 参数r：表示弧度也就是：Math.PI * 2; // 一周圆的弧度
-        function getRadian() {
-            const date = new Date();
-            let hh = date.getHours();
-            let mm = date.getMinutes();
-            let ss = date.getSeconds();
-            // console.log(`现在时间：${hh}: ${mm}: ${ss}`);
-
-            /*
-             * 基于时间比，计算指针在圆周(表盘)中的弧度算法
-             */
-
-            if (hh > 12) { hh -= 12 };
-
-            // 时针弧度
-            let hr = r * hh / 12 + r * mm / 12 / 60 + r * ss / 12 / 60 / 60;
-
-            // 分针弧度
-            let mr = r * mm / 60 + r * ss / 60 / 60;
-
-            // 秒针弧度
-            let sr = r * ss / 60;
-
-            return { hr, mr, sr };
-        };
+        draw();
 
         function draw() {
-            // 清除上一次绘制
-            context.clearRect(0, 0, canvas.width, canvas.height);
+            let x = oc.width / 2;
+            let y = oc.height / 2;
+            let r = 180;
 
-            // 保存状态
-            context.save();
+            let d = new Date();
+            let h = d.getHours();   //时
+            let m = d.getMinutes(); //分
+            let s = d.getSeconds(); //秒
 
-            // 偏移坐标
-            context.translate(canvas.width / 2, canvas.height / 2);
+            let hh = (-90 + h * 30 + m / 2) * Math.PI / 180;    //每刻30度
+            let mm = (-90 + m * 6) * Math.PI / 180;     //每刻6度
+            let ss = (-90 + s * 6) * Math.PI / 180;     //每刻6度
 
-            // 画布整体旋转(由于canvas旋转起点角度0是，时钟的3点正位置，所以要逆时针旋转到时钟的12点正的位置)
-            context.rotate(-Math.PI / 2);
+            ctx.clearRect(0, 0, oc.width, oc.height);
 
 
-            // 外框圆
-            context.save();
-            context.lineWidth = 10;
-            context.strokeStyle = 'blue';
-            context.beginPath();
-            context.arc(0, 0, 155, 0, r, false);
-            context.stroke();
-            context.restore();
+            // ctx.moveTo(200, 200);
+            // ctx.arc(200, 200, 50, 0, (6 * Math.PI / 180), false); //圆中心x坐标, 圆中心y坐标, 圆半径, 起始角(以弧度计[弧的圆形的三点钟位置是 0 度]), 结束角, 时针方向(false顺时针，true逆时针)。
 
-            // 内框圆
-            context.save();
-            context.lineWidth = 20;
-            context.strokeStyle = 'cyan';
-            context.beginPath();
-            context.arc(0, 0, 145, 0, r, false);
-            context.stroke();
-            context.restore();
+            // ctx.moveTo(200, 200);
+            // ctx.arc(200, 200, 50, (6 * Math.PI / 180), (12 * Math.PI / 180), false);
 
-            // 内框填充
-            context.save();
-            context.fillStyle = context.createPattern(img, 'repeat');
-            context.beginPath();
-            context.arc(0, 0, 145, 0, r, false);
-            context.fill();
-            context.restore();
+            // ctx.moveTo(200, 200);
+            // ctx.arc(200, 200, 50, (12 * Math.PI / 180), (18 * Math.PI / 180), false);
 
-            // 4个15分钟刻度
-            context.save();
-            context.lineWidth = 15;
-            context.strokeStyle = 'blue';
-            context.beginPath();
-            for (let i = 0; i < 4; i++) {
-                context.moveTo(90, 0);
-                context.lineTo(120, 0);
-                //局部旋转：每绘制完一个刻度就在旋转四分之一的弧度后再绘制
-                context.rotate(r / 4);
-            }
-            context.stroke();
-            context.restore();
-
-            // 12个小时刻度
-            context.save();
-            context.lineWidth = 6;
-            context.strokeStyle = 'yellow';
-            context.beginPath();
-            for (let i = 0; i < 12; i++) {
-                // 取消在4个15分钟刻度位绘制，也就是当i余3不等于0时
-                if (i % 3) {
-                    context.moveTo(90, 0);
-                    context.lineTo(120, 0);
-                }
-                context.rotate(r / 12);
-            }
-            context.stroke();
-            context.restore();
-
-            // 12个小时数字
-            // context.save();
-            // context.font = '20px sans-serif';
-            // context.fillStyle = 'white';
-            // context.beginPath();
-            // for (let i = 0; i < 12; i++) {
-            //     context.rotate(r / 12);
-            //     context.fillText(i + 1, 100, 0, 200);
-            // }
-            // context.fill();
-            // context.restore();
-
-            // 60分/秒钟刻度
-            context.save();
-            context.lineWidth = 2;
-            context.strokeStyle = 'red';
-            context.beginPath();
+            //绘制60个分秒刻度 60 = (360 / 6)
+            ctx.beginPath();
+            ctx.lineWidth = 1;
             for (let i = 0; i < 60; i++) {
-                // 取消在每5分钟刻度位绘制，也就是当i余5不等于0时
-                if (i % 5) {
-                    context.moveTo(118, 0);
-                    context.lineTo(120, 0);
-                }
-                context.rotate(r / 60);
+                ctx.moveTo(x, y); //启始中心点
+                ctx.arc(x, y, r, (6 * i * Math.PI / 180), (6 * (i + 1) * Math.PI / 180), false);
             }
-            context.stroke();
-            context.restore();
+            ctx.closePath();
+            ctx.stroke();
 
 
-            const { hr, mr, sr } = getRadian();
-
-            // 时针
-            context.save();
-            context.lineWidth = 9;
-            context.strokeStyle = 'blue';
-
-            context.beginPath();
-            context.rotate(hr);
-            context.moveTo(-20, 0);
-            context.lineTo(65, 0);
-            context.stroke();
-            context.restore();
-
-            // 分针
-            context.save();
-            context.lineWidth = 4;
-            context.strokeStyle = 'yellow';
-            context.rotate(mr);
-            context.beginPath();
-            context.moveTo(-28, 0);
-            context.lineTo(80, 0);
-            context.stroke();
-            context.restore();
-
-            // 秒针
-            context.save();
-            context.lineWidth = 2;
-            context.strokeStyle = 'red';
-            context.rotate(sr);
-            context.beginPath();
-            context.moveTo(-30, 0);
-            context.lineTo(120, 0);
-            context.stroke();
-            context.restore();
-
-            // 秒针圆
-            context.save();
-            context.fillStyle = 'red';
-            context.beginPath();
-            context.arc(0, 0, 8, 0, r, false);
-            context.fill();
-            context.restore();
+            //绘制白圆 遮住分秒刻度线
+            ctx.beginPath();
+            ctx.fillStyle = 'white';
+            ctx.moveTo(x, y);   //启始中心点
+            ctx.arc(x, y, r - 10, 0, (360 * Math.PI / 180), false);
+            //ctx.arc(x, y, 170, 0, (2 * Math.PI), false);
+            ctx.closePath();
+            ctx.fill();         //填充当前绘图
 
 
-            // 数字时钟1
-            // context.save();
-            // const text = getNumTime();
-            // context.rotate(Math.PI / 2);
-            // context.textAlign = 'center';
-            // context.textBaseline = 'top';
-            // context.font = '100px sans-serif';
-            // context.fillStyle = 'white';
-            // context.fillText(text, 0, canvas.height / 3.3, canvas.width);
-            // context.restore();
+            //绘制12个时间刻度 12 = (360 / 30)
 
-            // 数字时钟2
-            // context.save();
-            // const text = getNumTime();
-            // context.rotate(Math.PI / 2);
-            // context.fillStyle = '#a76921';
-            // context.font = 'bold 100px 微软雅黑';
-            // context.lineWidth = 6;
-            // context.strokeStyle = '#f0d5ac';
-            // context.textAlign = 'center';
-            // context.textBaseline = 'top';
-            // context.shadowOffsetX = 0;
-            // context.shadowOffsetY = 2;
-            // context.shadowBlur = 4;
-            // context.shadowColor = 'black';
-            // context.fillText(text, 0, canvas.height / 3.3, canvas.width);
-            // context.strokeText(text, 0, canvas.height / 3.3, canvas.width);
-            // context.lineWidth = 1;
-            // context.strokeStyle = 'black';
-            // context.setLineDash([5, 3]);
-            // context.strokeText(text, 0, canvas.height / 3.3, canvas.width);
-            // context.restore();
+            ctx.beginPath();
+            ctx.lineWidth = 3;
+            for (let i = 0; i < 12; i++) {
+                ctx.moveTo(x, y); //启始中心点
+                ctx.arc(x, y, r, (30 * i * Math.PI / 180), (30 * (i + 1) * Math.PI / 180), false);
+            }
+            ctx.closePath();
+            ctx.stroke();       //绘制已定义的路径
 
-            // 数字时钟3
-            context.save();
-            const text = getNumTime();
+            //绘制白圆 遮住时间刻度线
+            ctx.beginPath();
+            ctx.fillStyle = 'white';
+            ctx.moveTo(x, y);   //启始中心点
+            ctx.arc(x, y, r - 20, 0, (2 * Math.PI), false);
+            ctx.closePath();
+            ctx.fill();         //填充当前绘图
 
-            context.font = 'bold 120px Arial';
-            context.textAlign = 'center';
-            context.rotate(Math.PI / 2);
-            context.translate(0, 120);
+            //绘制时针
+            ctx.save();
+            ctx.beginPath();
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = 'red';
+            ctx.moveTo(x, y);   //启始中心点
+            ctx.arc(x, y, r - 80, hh, hh, false);
+            ctx.closePath();
+            ctx.stroke();       //绘制已定义的路径
+            ctx.restore();
 
-            //投影
-            context.shadowColor = 'rgba(0,0,0,0.6)';
-            context.shadowOffsetY = 2;
-            context.shadowBlur = 4;
+            //绘制分针
+            ctx.save();
+            ctx.beginPath();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = 'blue';
+            ctx.moveTo(x, y);   //启始中心点
+            ctx.arc(x, y, r - 40, mm, mm, false);
+            ctx.closePath();
+            ctx.stroke();       //绘制已定义的路径
+            ctx.restore();
 
-            //实体文字
-            context.fillStyle = '#a76921';
-            context.fillText(text, 0, 150);
+            //绘制秒针
+            ctx.save();
+            ctx.beginPath();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'green';
+            ctx.moveTo(x, y);   //启始中心点
+            ctx.arc(x, y, r - 10, ss, ss, false);
+            ctx.closePath();
+            ctx.stroke();       //绘制已定义的路径
+            ctx.restore();
 
-            //实体描边文字
-            context.strokeStyle = '#f0d5ac';
-            context.lineWidth = 6;
-            context.strokeText(text, 0, 150);
-
-            //虚线描边
-            context.strokeStyle = '#333';
-            context.lineWidth = 1;
-            context.setLineDash([5, 3]);
-            context.strokeText(text, 0, 150);
-            context.restore();
-
-
-            // 还原上一次save的状态
-            context.restore();
         };
 
-
-        // 获取当前时间
-        function getNumTime() {
-            const date = new Date();
-            let hh = date.getHours();
-            let mm = date.getMinutes();
-            let ss = date.getSeconds();
-            // console.log(`现在时间：${hh}: ${mm}: ${ss}`);
-
-            hh = (hh < 10) ? '0' + hh : hh;
-            mm = (mm < 10) ? '0' + mm : mm;
-            ss = (ss < 10) ? '0' + ss : ss;
-
-            return `${hh}:${mm}:${ss}`;
-        };
-
-
-        function draw2() {
-            const text = getNumTime();
-
-            context.save();
-            context.translate(canvas.width / 2, 50);
-
-            // 文本颜色：
-            context.fillStyle = '#a76921';
-            context.font = 'bold 100px 微软雅黑';
-
-            context.lineWidth = 6;
-            context.strokeStyle = '#f0d5ac';
-
-            context.textAlign = 'center';
-            context.textBaseline = 'top';
-
-            // 投影
-            context.shadowOffsetX = 0;
-            context.shadowOffsetY = 2;
-            context.shadowBlur = 4;
-            context.shadowColor = 'black';
-
-            // 文本填充
-            context.fillText(text, 0, 0, canvas.width);
-
-            // 文本描边
-            context.strokeText(text, 0, 0, canvas.width);
-
-            // 针线效果
-            context.lineWidth = 1;
-            context.strokeStyle = 'black';
-            context.setLineDash([5, 3]);
-            context.strokeText(text, 0, 0, canvas.width);
-            context.restore();
-        };
-
-        !(function render() {
+        window.setInterval(function () {
             draw();
-            draw2();
-            requestAnimationFrame(render);
-        })();
+        }, 1000);
+    };
 
-    </script>
-</body>
+
+</script>
 
 </html>

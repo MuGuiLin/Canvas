@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,user-scalable=no">
+    <title>coffee</title>
+    <style>
+        *{user-select: none;}
+        html,body{height: 100%}
+        body{
+            margin: 0;
+            overflow: hidden;
+        }
+        /*容器，包含所有图片*/
+        #wrapper{
+            position: relative;
+            height: 100%;
+            background-image: url("./img/wood.jpg");
+            text-align: center;
+        }
+        #wrapper *{
+            opacity: 0;
+        }
+        /*咖啡豆*/
+        #beans{
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 80%;
+        }
+        /*玫瑰*/
+        #rose{
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 70%;
+        }
+        /*鱼，MP4 格式，在pc 宽屏中显示，受遮罩影响*/
+        #fishVid{
+            display: none;
+            -webkit-mask-image: url("./img/milk.png");
+            mask-image: url("./img/milk.png");
+            -webkit-mask-size:100%;
+            mask-size:100%;
+        }
+        /*canvas,将在其中绘制拿铁*/
+        #canvas{
+            cursor: pointer;
+        }
+        /*拿铁*/
+        #latte{
+            display: none;
+        }
+        /*与咖啡杯相关的元素*/
+        .cup-ele{
+            position: absolute;
+            width: 90%;
+            top:40%;
+            left:50%;
+            transform: translate(-50%,-50%);
+        }
+        /*依次过度的动画*/
+        .trans1{
+            transition: opacity 1500ms;
+        }
+        .trans2{
+            transition: opacity 1500ms 400ms;
+        }
+        .trans3{
+            transition: opacity 1000ms 700ms;
+        }
+        .trans4{
+            transition: opacity 500ms 1300ms;
+        }
+
+        /*自适应宽度*/
+        @media (min-width: 768px) {
+            #beans{
+                width: 40%;
+            }
+            #rose{
+                width: 40%;
+            }
+            #fishVid{
+                display: block;
+            }
+            #fishImg{
+                display: none;
+            }
+            .cup-ele{
+                top:45%;
+                width: 50%;
+            }
+        }
+        @media (min-width: 1200px) {
+            #beans{
+                width: 30%;
+            }
+            .cup-ele{
+                top:45%;
+                width: 40%;
+            }
+            #rose{
+                width: 30%;
+            }
+        }
+    </style>
+</head>
+<body>
+<!--容器-->
+<div id="wrapper">
+    <!--咖啡豆-->
+    <img src="./img/beans.png" id="beans" class="trans1" alt="" draggable="false">
+    <!--玫瑰花瓣-->
+    <img src="./img/rose.png" id="rose" class="trans2" alt="" draggable="false">
+    <!--鱼的图片，在宽度小于768 的屏幕中显示。（在移动端做视频遮罩有点麻烦，所以先用图片代替）-->
+    <img src="./img/fish.png" id="fishImg" class="cup-ele trans4" alt="" draggable="false">
+    <!--鱼的MP4视频，在pc 端显示-->
+    <video src="https://yxyy-lesson.oss-cn-beijing.aliyuncs.com/fish.mp4" id="fishVid" class="cup-ele trans4" loop muted autoplay></video>
+    <!--杯子-->
+    <img src="./img/cup.png" id="cup" class="cup-ele trans3" alt="" draggable="false">
+    <!--canvas，在里面画拿铁，用于擦除-->
+    <canvas id="canvas" class="cup-ele trans3"></canvas>
+</div>
+<!--图像源-->
+<div id="originImg">
+    <!--拿铁的图像源-->
+    <img src="./img/milk.png" id="latte" class="cup-ele" alt="">
+</div>
+
+<script>
+    /*
+    * 线对象 Line
+    *   ctx 上下文对象
+    *   drawing 是否正在绘图
+    *
+    *   鼠标按下 moveTo(x,y)
+    *       保存状态
+    *       设置全局合成属性globalCompositeOperation 为destination-out
+    *       绘制路径起点
+    *   鼠标移动 lineTo(x,y)
+    *       设置下一个点
+    *       并绘图
+    *   鼠标抬起
+    *       状态还原 restore()
+    * */
+    class Line{
+        constructor(ctx) {
+            this.ctx=ctx;
+            this.drawing=false;
+        }
+        moveTo(x,y){
+            this.drawing=true;
+            const {ctx}=this;
+            ctx.save();
+            ctx.lineWidth=120;
+            ctx.lineJoin='round';
+            ctx.globalCompositeOperation='destination-out';
+            ctx.beginPath();
+            ctx.moveTo(x,y);
+        }
+        lineTo(x,y){
+            const {ctx}=this;
+            ctx.lineTo(x,y);
+            ctx.stroke();
+        }
+        restore(){
+            this.ctx.restore();
+            this.drawing=false;
+        }
+    }
+
+    /*所有资源加载成功后，再绘图*/
+    window.addEventListener('load',function(){
+        loadFn();
+    });
+    function loadFn(){
+        /*===============图片显示===============*/
+        const {childNodes}=document.getElementById('wrapper');
+        Array.from(childNodes).forEach((ele)=>{
+            if (ele.style){
+                ele.style.opacity='1';
+            }
+        });
+
+        /*===============拿铁的绘制===============*/
+        const canvas=document.getElementById('canvas');
+        const latImg=document.getElementById('latte');
+        const {width,height}=latImg;
+
+        canvas.width=width;
+        canvas.height=height;
+        const ctx=canvas.getContext('2d');
+        ctx.drawImage(latImg,0,0);
+
+        /*===============拿铁的擦除===============*/
+        /*实例化线对象 Line*/
+        const line=new Line(ctx);
+
+        /*监听鼠标按下事件*/
+        canvas.addEventListener('mousedown',function(event){
+            if(event.buttons===1) {
+                const {x, y} = getMousePos(canvas, event);
+                line.moveTo(x, y);
+            }
+        });
+        /*监听鼠标移动事件*/
+        canvas.addEventListener('mousemove',function(event){
+            if(event.buttons===1&&line.drawing) {
+                const {x, y} = getMousePos(canvas, event);
+                line.lineTo(x, y);
+            }
+        });
+        /*监听鼠标抬起事件*/
+        canvas.addEventListener('mouseup',function(event){
+            if(event.buttons===1) {
+                line.restore();
+            }
+        });
+
+        /*触摸事件*/
+        canvas.addEventListener('touchstart',function(event){
+            const {x,y}=getTouchPos(canvas,event);
+            line.moveTo(x,y);
+        });
+        canvas.addEventListener('touchmove',function(event){
+            event.preventDefault();
+            const {x,y}=getTouchPos(canvas,event);
+            line.lineTo(x,y);
+        });
+        canvas.addEventListener('touchend',function(){
+            line.restore();
+        });
+    }
+
+    //获取鼠标位置
+    function getMousePos(canvas,event){
+        return getPos(canvas,event.clientX,event.clientY);
+    }
+    //获取触摸点位置
+    function getTouchPos(canvas,event){
+        //获取鼠标位置
+        const {pageX,pageY}=event.changedTouches[0];
+        return getPos(canvas,pageX,pageY);
+    }
+
+    //基于鼠标或触摸点的位置，获取鼠标在canvas 中的像素位
+    function getPos(canvas,px,py){
+        console.log('----------------------------------------------');
+        //解构canvas的css 尺寸和画布尺寸
+        const {clientWidth,clientHeight,width,height}=canvas;
+        console.log('css 尺寸',clientWidth,clientHeight);
+        console.log('画布 尺寸',width,height);
+        //获取canvas 相对于窗口的css 位置
+        const {top,left}=canvas.getBoundingClientRect();
+        console.log('canvas 相对于窗口的css 位置',top,left);
+        //鼠标在canvas 中的css位置 = 鼠标在窗口中的css 位置-canvas在窗口中的css 位置
+        const [cssX,cssY]=[px-left,py-top];
+        console.log('鼠标在canvas 中的css位置',cssX,cssY);
+        //鼠标在canvas 中的百分位 = css位置/css尺寸
+        const [percentX,percentY]=[cssX/clientWidth,cssY/clientHeight];
+        console.log('鼠标在canvas 中的百分位',percentX,percentY);
+        //鼠标在canvas 中的像素位 = 画布尺寸*位置的百分比
+        const [x,y]=[width*percentX,height*percentY];
+        console.log('鼠标在canvas 中的像素位',x,y);
+        return {x,y};
+        // return {x:cssX,y:cssY};
+    }
+</script>
+</body>
+</html>
+

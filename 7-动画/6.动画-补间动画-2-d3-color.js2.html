@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>补间动画</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden
+        }
+
+        #canvas {
+            background: antiquewhite;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <script src="./js/d3-color.js"></script>
+    <!--<script src="./js/Tween.js"></script>-->
+    <script src="./js/SupTween.js"></script>
+    <script>
+        const [width, height] = [window.innerWidth, window.innerHeight];
+        const canvas = document.getElementById('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+
+        //小球对象
+        class Ball {
+            constructor(r, color = '#000') {
+                this.color = color;
+                this.r = r;
+                this.x = 0;
+                this.y = 0;
+            }
+            draw(ctx) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.fillStyle = this.color;
+                ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        //实例化小球
+        const ball = new Ball(100, 'green');
+        ball.x = width / 2;
+        ball.y = 200;
+
+
+        //实例化Tween 对象,为其添加目标对象
+        let tween = new TWEEN.Tween(ball);
+        //设置目标对象一段时间后的状态to({ key:val }, 时间长度)
+        tween.to({ color: '#00acec' }, 2000);
+        //开始计时 start()
+        tween.start();
+        //重复 repeat(Infinity)
+        tween.repeat(Infinity);
+        //悠悠球 yoyo(true)
+        tween.yoyo(true);
+        //设置插值
+        //Linear, Quadratic, Cubic, Quartic, Quintic, Sinusoidal, Exponential, Circular, Elastic, Back, Bounce
+        tween.easing(TWEEN.Easing.Bounce.Out);
+        //事件监听
+        //onUpdate,onStart,onStop,onComplete
+        tween.onUpdate(function () {
+            //console.log(this.x)
+        });
+
+
+        //渲染方法
+        !(function render() {
+            //更新目标目标对象的状态
+            TWEEN.update();
+
+            //擦除
+            ctx.clearRect(0, 0, width, height);
+            //绘图
+            ball.draw(ctx);
+            //递归调用render 函数
+            window.requestAnimationFrame(render);
+        })()
+
+    </script>
+</body>
+
+</html>

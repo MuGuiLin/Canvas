@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-图像</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: indigo;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+
+        li {
+            position: relative;
+            display: inline-block;
+            list-style: none;
+        }
+
+        canvas,
+        img {
+            width: 400px;
+            height: 220px;
+            border: 1px solid darkgray;
+        }
+
+        button {
+            padding: 6px 20px;
+            margin: 6px 3px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Video截取第一帧 Canvas 动态视频渲染、截取</h1>
+    <hr>
+    <header>
+        <video id="video" src="./video/奥妙洗衣液.mp4" controls="" width="440" height="260" loop autoplay></video>
+        <p>视频播放器-VIDEO</p>
+    </header>
+
+    <section>
+        <ul>
+            <li>
+                <img id="rendering-img" class="img">
+                <p>获取当前帧到-IMG</p>
+            </li>
+            <li>
+                <canvas id="canvas" class="canvas" width="300" height="150">
+                    对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+                    canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+                    canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+                </canvas>
+                <p>视频同步渲染到-CANVAS</p>
+            </li>
+        </ul>
+    </section>
+
+    <footer>
+        <button id="video-play-btn">视频播放</button>
+        <button id="video-pause-btn">视频暂停</button>
+        <button id="video-volumed-btn">音量增大</button>
+        <button id="video-volumex-btn">音量减小</button>
+        <button id="fullscreen-btn">视频全屏</button>
+        <button id="get-current-btn">获取当前视频帧</button>
+        <button id="rendering-btn">视频同步渲染</button>
+        <button id="body-bg-btn">渲染到body背景</button>
+    </footer>
+
+    <pre>
+    <code>
+        前言：
+        在Web开发过程中，由于现在的新媒体技术、资源、客户体验、需求等也越来越广、多、高，作为HTML5中较为重要的 新媒体video视频API，也是用得非常之多。
+        比如之前有个项目要在微信中做直播（半屏）播放（rtmp, m3u8等视频流），在IOS手机还好（听说ios手机微信没那么大的操控权限），而在Android手机下（Android系统毕竟是开源产品）， 
+        只要在微信X5内核浏览器中播放视频 就会自动全屏，而且z-index层级也是最高的（当然以qq.什么的域名的视频就不全屏，这是腾讯自已的东西，爱怎么搞就怎么搞咯！
+        我们第三方开发者也没办法，后来他们又搞了一个同层策略 在video标签中加上 x5-video-player-type="h5" 属性，然而还是有一堆这那样的问题），然后不能发东西，
+        打字聊天等【如有朋友已经解决的情况下，还请多多指教，在此先谢过了！！！】， 还有前两天有个项目就用到了, 其中有个需求就是要获取html5的video视频第一帧作为播放前的图片，
+        还有自定义控制相关播放按扭等等。所以就和大家一起分享。如有更好解决办法的朋友，欢迎指导！
+        
+        原理：        
+        主要是靠canvas中的 
+        
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        这个方法可以根据图片，视频等进行绘制图片（也可反复重绘），而
+        
+        canvas.toDataURL("image/png", 1)
+        可以得到canvas所绘制的图像（Base64）。无论是抓取图片 或 动态加载视频 都一样，其区别就在于：如果是抓取（图片）一帧就是只获取一次
+        
+        canvas.toDataURL("image/png", 1)
+         而如果是加载视频的话就设置一个定时器不停的canvas.toDataURL("image/png", 1)抓取每帧的画面。
+        
+        最后将其添加到Canvas画布, img标签，甚至div、body等标签元素的src属性 或 url背景里面都是可以的 [在这里用了 img、canvas 以及body] 这3个标签来做的实例。
+        
+        问题：        
+        方法虽然好用但是canvas.toDataURL("image/png", 1)；有一个问题就是不能跨域获取，简间来说就是所抓取的视频文件和执行抓取的html文件页面要在同一个域里才行。
+        还有就是当Canvas所渲染元素如Canvas画布, img标签，div标签、body 标签等太多了的情况下，页面就会出现卡顿现象。
+        
+        解决办法：        
+        第一个toDataURL("image/png", 1)跨域问题，我在网上找了好多办法，如：
+        
+        image.setAttribute('crossOrigin', 'anonymous');
+        等都不管用。最后就不跨域，把要抓取的视频文件和执行抓取的html文件页面都放在同一个域名下。【如有朋友已经解决的情况下，还请多多指教，在此先谢过了！！！】        
+        
+        问题2 
+        
+        渲染元素太多，有卡顿现象，经测试将toDataURL("image/png", 1)输出的图像作为背景的形式给元素添加稍微好点，但实在多了也还是会卡顿的（当然这也和每个人所使用的电脑性能也有点关系的）。
+    </code>
+    </pre>
+
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+        const video = document.getElementById("video");
+
+        // 设置画布宽高
+        canvas.width = 800;
+        canvas.height = 600;
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
+
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
+         * 
+         * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
+         **/
+
+
+        // 变换画布默认起始x和y的左上角，为右下角！！
+        // context.translate(canvas.width / 2, canvas.height / 2);
+
+
+        let interval = null;
+
+        //截取视频画面
+        const CaptureFirstFrame = function () {
+
+            this.CaptureVideo = function (img, rsy, bbg) {
+                //canvas 缩放比率
+                this.scale = 1;
+
+                //创建canvas元素
+                this.canvas = document.createElement("canvas");
+
+                //设置canvas画布大小
+                this.canvas.width = canvas.width = video.videoWidth * this.scale;
+                this.canvas.height = canvas.height = video.videoHeight * this.scale;
+
+                //设置canvas画布内容、位置
+                this.canvas.getContext('2d').drawImage(video, 0, 0, this.canvas.width, this.canvas.height);
+
+
+                //注：
+                /*
+                 * canvas.toDataURL("image/png", 1) 方法可能会出错！！！
+                 * 因为 【 如果视频文件所在的 域 和 当前index.html页面所在域不同，就会出现跨域传输的问题】，【及便是给img标签加上crossOrigin': 'anonymous' 也没用！】
+                 * 所以 请将 视频文件 和 当前index.html页面放在同一个域中，才能正常运行。
+                 */
+
+                if (img) {
+                    document.querySelector('#rendering-img').setAttribute('crossOrigin', 'anonymous');
+                    document.querySelector('#rendering-img').setAttribute('src', this.canvas.toDataURL("image/png", 1));
+                };
+
+                if (rsy) {
+                    canvas.getContext('2d').drawImage(video, 0, 0, this.canvas.width, this.canvas.height);
+                };
+
+                if (bbg) {
+                    document.body.style.backgroundImage = `url(${this.canvas.toDataURL("image/png", 1)})`;
+                };
+            }
+        };
+
+        //打开全屏方法
+        CaptureFirstFrame.prototype.openFullscreen = function (element) {
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+            } else if (element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+            } else if (element.msRequestFullscreen) {
+                element.msRequestFullscreen();
+            } else if (element.webkitRequestFullscreen) {
+                element.webkitRequestFullScreen();
+            }
+        };
+
+        const V = new CaptureFirstFrame();
+
+        //监听视频加载完成时 获取第一帧
+        video.addEventListener('loadeddata', function () {
+            V.CaptureVideo(true);
+        }, false);
+
+        //监听视频播放时
+        video.addEventListener('play', function () {
+            //播放时
+        }, false);
+
+        //监听视频暂停时
+        video.addEventListener('pause', function () {
+            clearInterval(interval);
+        }, false);
+
+        //视频播放
+        document.getElementById("video-play-btn").addEventListener('click', function () {
+            video.play();
+        }, false);
+
+        //视频暂停
+        document.getElementById("video-pause-btn").addEventListener('click', function () {
+            video.pause();
+        }, false);
+
+        //音量增大
+        document.getElementById("video-volumed-btn").addEventListener('click', function () {
+            (video.volume > 1 || video.volume == 1) ? video.volume = 1 : video.volume = video.volume + 0.1;
+            console.log(video.volume)
+        }, false);
+
+        //音量增大
+        document.getElementById("video-volumex-btn").addEventListener('click', function () {
+            (video.volume < 0.2 || video.volume == 0) ? video.volume = 0 : video.volume = video.volume - 0.1;
+            console.log(video.volume)
+        }, false);
+
+        //视频全屏
+        document.getElementById("fullscreen-btn").addEventListener('click', function () {
+            V.openFullscreen(video);
+        }, false);
+
+        //获取当前帧
+        document.getElementById("get-current-btn").addEventListener('click', function () {
+            V.CaptureVideo(true);
+        }, false);
+
+        //视频同步渲染
+        document.getElementById("rendering-btn").addEventListener('click', function () {
+            clearInterval(interval);
+            interval = window.setInterval(function () {
+                V.CaptureVideo(false, true);
+            }, 1);
+        }, false);
+
+        //渲染到body背景
+        document.getElementById("body-bg-btn").addEventListener('click', function () {
+            clearInterval(interval);
+            interval = window.setInterval(function () {
+                V.CaptureVideo(false, false, true);
+            }, 1);
+        }, false);
+
+    </script>
+</body>
+
+</html>
