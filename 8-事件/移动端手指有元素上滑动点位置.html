@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .bar {
+            margin: 50px auto;
+            width: 500px;
+            height: 50px;
+            background: red;
+        }
+    </style>
+</head>
+
+<body>
+    <section class="bar" id="bar">
+    </section>
+
+    <script>
+
+        const bar = document.querySelector('#bar');
+
+
+        //获取触摸点位置
+        function getTouchPos(event) {
+            //获取鼠标位置
+            const { pageX, pageY } = event.changedTouches[0];
+            return getPos(pageX, pageY);
+        };
+
+        //基于鼠标或触摸点的位置
+        function getPos(px, py) {
+            const { clientWidth, clientHeight, offsetWidth, offsetHeight } = bar;
+
+            //获取相对于窗口的css 位置
+            const { top, left } = bar.getBoundingClientRect();
+            // console.log('相对于窗口的css 位置', top, left);
+
+            //鼠标在中的css位置 = 鼠标在窗口中的css 位置-bar在窗口中的css 位置
+            const [cssX, cssY] = [px - left, py - top];
+            // console.log('鼠标在中的css位置', cssX, cssY);
+
+            //鼠标在中的百分位 = css位置/css尺寸
+            const [percentX, percentY] = [cssX / clientWidth, cssY / clientHeight];
+            // console.log('鼠标在中的百分位', percentX, percentY);
+
+            //鼠标在中的像素位 = bar尺寸*位置的百分比
+            const [x, y] = [offsetWidth * percentX, offsetHeight * percentY];
+            // console.log('鼠标在中的像素位', x, y);
+
+            return { x, y };
+
+        };
+
+
+        /*移动端 - 触摸事件*/
+        bar.addEventListener('touchstart', function (event) {
+            const { x, y } = getTouchPos(event);
+            console.log(x, y);
+        });
+        bar.addEventListener('touchmove', function (event) {
+            event.preventDefault();
+            const { x, y } = getTouchPos(event);
+            console.log(x, y);
+            bar.innerText = x;
+        });
+        
+        bar.addEventListener('touchend', function () {
+            bar.ontouchmove = null;
+        });
+
+    </script>
+</body>
+
+</html>
