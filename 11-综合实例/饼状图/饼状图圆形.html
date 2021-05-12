@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>demo1</title>
+	<style type="text/css">
+		h1 {
+			text-align: center;
+		}
+
+		canvas {
+			display: block;
+			margin: auto;
+			border: 1px solid purple;
+			background: #CCCCCC;
+		}
+	</style>
+</head>
+
+<body>
+	<h1>饼状图demo1</h1>
+	<hr />
+	<canvas id="canvas" width="600" height="600"></canvas>
+</body>
+
+<script type="text/javascript">
+	let cvs = document.querySelector('#canvas'),
+		ctx = cvs.getContext('2d'),
+		cx = cvs.width / 2; // 300 = 600 / 2
+	cy = cvs.height / 2;
+
+	//下面大圆
+	ctx.beginPath();
+	ctx.arc(cx, 300, 200, 0, (2 * Math.PI), false);
+	ctx.fillStyle = 'blue';
+	ctx.fill();
+
+	//上面小圆
+	ctx.beginPath();
+	ctx.arc(300, cy, 100, 0, (2 * Math.PI), false);
+	ctx.fillStyle = 'white';
+	ctx.fill();
+
+</script>
+
+</html>

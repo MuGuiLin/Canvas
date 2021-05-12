@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>柱状图</title>
+    <style>
+        body{margin: 0;overflow: hidden}
+        #canvas{background: antiquewhite;}
+    </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+    const canvas=document.getElementById('canvas');
+    const [width,height]=[window.innerWidth,window.innerHeight];
+    canvas.width=width;
+    canvas.height=height;
+    const  ctx=canvas.getContext('2d');
+
+    /*======== 一，声明必备数据 ==========*/
+    //系列标签
+    const seriesLabel=['T恤','夹克','护甲背心','迷彩服','防弹衣'];
+    //系列数据
+    const seriesData=[9521,3030,5400,1550,7001];
+    //y 轴行数
+    let rowNum=5;
+    //柱状图的位置
+    const pos={x:50,y:0};
+    //柱状图宽高
+    const [outWidth,outHeight]=[750,600];
+    //柱状图内边距
+    const pad=80;
+    //柱状图百分比类型的列边距
+    const colPerPad=0.1;
+    //刻度的长度
+    const markLen=10;
+    //标签文字的偏移距离
+    const labelOffset=8;
+    //系列图形的颜色
+    const itemColor='chocolate';
+
+    /*======== 二，构建数据 ==========*/
+    /*------ 1.计算基本数据 -------*/
+    //绘图区宽高
+    const innerWidth=outWidth-pad*2;
+    const innerHeight=outHeight-pad*2;
+    //绘图区的顶部位置
+    const innerTop=pos.y+pad;
+    //绘图区的底部位置
+    const innerBottom=innerTop+innerHeight;
+    //绘图区的左侧位置
+    const innerLeft=pos.x+pad;
+    //绘图区的右侧位置
+    const innerRight=innerLeft+innerWidth;
+    //x 轴刻度的终点的y位置
+    const xMarkEndY=innerBottom+markLen;
+    //x 轴标签的y位置
+    const xLabelY=innerBottom+labelOffset;
+    //y 轴刻度的终点的x位置
+    const yMarkEndX=innerLeft-markLen;
+    //y 轴标签的x位置
+    const yLabelX=yMarkEndX-labelOffset;
+
+
+
+    /*------ 2.计算y 轴向的数据 -------*/
+    //y 轴数据的最大值
+    const maxDataY=Math.max(...seriesData);
+    //基于标签（实际数据）的行高
+    const rowLabelSize=getRowSize(maxDataY,rowNum);
+    //y 轴标签的最大值
+    const maxLabelY=rowLabelSize*rowNum;
+    //基于像素的行高
+    const rowSize=innerHeight/rowNum;
+    //y 轴标签的值的集合
+    const yLabelsVal=[];
+    //y 轴刻度的y位置的集合
+    const yMarksY=[];
+    //遍历刻度数，自上而下计算数据
+    for(let r=0;r<rowNum+1;r++){
+        //y 轴标签的值的集合，越往下越大
+        yLabelsVal.push(maxLabelY-rowLabelSize*r);
+        //y 轴刻度的y位置的集合，越往下越小
+        yMarksY.push(innerTop+rowSize*r);
+    }
+    //计算行高 - 行高取整 - 扩展
+    function getRowSize(maxDataY,rowNum){
+        console.log('极值maxDataY',maxDataY);
+        console.log('行数rowNum',rowNum);
+        //计算均分值，将最大尺寸均分成rowNum 段
+        const size=Math.ceil(maxDataY/rowNum);
+        console.log('size',size);
+        //均分值size 的长度
+        const len=size.toString().length;
+        console.log('len',len);
+        //将长度的一半作为幂的指数
+        const index=Math.floor(len/2);
+        console.log('index',index);
+        //求10的index次幂
+        const power=Math.pow(10,index);
+        console.log('power',power);
+        //将size除以幂的值，得到小数
+        const flNum=size/power;
+        console.log('flNum',flNum);
+        //将小数上舍取整
+        const intNum=Math.ceil(flNum);
+        console.log('intNum',intNum);
+        //基于整数还原数据
+        const c=intNum*power;
+        console.log('c',c);
+        //行高不能小于1
+        return Math.max(c,1);
+    }
+
+    /*------ 3.系列图形的数据 -------*/
+    //列数
+    const colNum=seriesLabel.length;
+    //列宽
+    const colSize=innerWidth/colNum;
+    //列的内边距
+    const colPad=colSize*colPerPad;
+    //柱体宽度
+    const itemWidth=colSize-colPad*2;
+    //x 轴刻度的x 位置信息
+    const xMarksX=[];
+    //x 轴标签的x 位置信息
+    const xBablesX=[];
+    //柱状体x的位置信息
+    const itemsX=[];
+    //柱状体的高度信息
+    const itemsHeight=[];
+    //柱体的y位置信息
+    const itemsY=[];
+    //遍历x 轴刻度标签
+    seriesLabel.forEach((ele,ind)=>{
+        //基本x 位
+        const basicX=innerLeft+colSize*ind;
+        //x 轴刻度的x 位置信息
+        xMarksX.push(basicX+colSize);
+        //x 轴标签的x 位置信息
+        xBablesX.push(basicX+colSize/2);
+        //柱状体的x 位置信息
+        itemsX.push(basicX+colPad);
+        //柱体高度在整个绘图区中的占比
+        const ratio=seriesData[ind]/maxLabelY;
+        //柱体的像素高度
+        const itemH=innerHeight*ratio;
+        itemsHeight.push(itemH);
+        //柱状体的y位置信息
+        itemsY.push(innerBottom-itemH);
+    });
+
+    /*======== 三，基于数据绘图 ==========*/
+    /*------ 1.系列图形（柱体）的绘制 -------*/
+    /*建立矩形对象 Rect
+    * 属性：
+    *   width 宽度
+    *   height 高度
+    *   color 颜色
+    *   x,y 位置
+    *   text 标签
+    *   data 实际数据
+    * 方法：
+    *   draw(ctx)
+    * */
+    class Rect{
+        constructor(width=0,height=0,color='#000'){
+            this.width=width;
+            this.height=height;
+            this.color=color;
+            this.x=0;
+            this.y=0;
+            this.text='';
+            this.data=0;
+        }
+        draw(ctx){
+            ctx.save();
+            const {x,y,width,height,color}=this;
+            ctx.fillStyle=color;
+            ctx.fillRect(x,y,width,height);
+            ctx.restore();
+        }
+    }
+
+
+
+    //绘制柱体
+    //建立柱体集合
+    const series=[];
+    //遍历系列标签seriesLabel 实例化矩形对象，并将其添加到柱体集合
+    seriesLabel.forEach((ele,ind)=>{
+        const item=new Rect(itemWidth,itemsHeight[ind],itemColor);
+        item.x=itemsX[ind];
+        item.y=itemsY[ind];
+        item.text=ele;
+        item.data=seriesData[ind];
+        series.push(item);
+    });
+
+    /*------ 2.坐标的绘制 drawCoord(ctx) -------*/
+    function drawCoord(ctx){
+        /*------ 绘制y 轴图形 -------*/
+        //y轴
+        drawLine(ctx,innerLeft,innerTop,innerLeft,innerBottom);
+        //遍历y 轴刻度标签
+        yLabelsVal.forEach((ele,ind)=>{
+            //y轴刻度
+            drawLine(ctx,innerLeft,yMarksY[ind],yMarkEndX,yMarksY[ind]);
+            //y轴标签
+            drawText(ctx,ele,yLabelX,yMarksY[ind],'right','middle');
+            //绘图区辅助线
+            if(ind!==rowNum){
+                drawLine(ctx,innerLeft,yMarksY[ind],innerRight,yMarksY[ind],'rgba(0,0,0,0.3)');
+            }
+        });
+        /*------ 绘制x 轴图形 -------*/
+        //x轴
+        drawLine(ctx,innerLeft,innerBottom,innerRight,innerBottom);
+        //遍历x 轴刻度标签
+        seriesLabel.forEach((ele,ind)=>{
+            //x轴刻度
+            drawLine(ctx,xMarksX[ind],innerBottom,xMarksX[ind],xMarkEndY);
+            //x轴标签
+            drawText(ctx,ele,xBablesX[ind],xLabelY,'center','top');
+        });
+    }
+    /*绘制线的方法 drawLine(ctx,x1,y1,x2,y2,color='#000')
+    * lineCap='square'
+    * */
+    function drawLine(ctx,x1,y1,x2,y2,color='#000'){
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(x1,y1);
+        ctx.lineTo(x2,y2);
+        ctx.lineCap='square';
+        ctx.strokeStyle=color;
+        ctx.stroke();
+        ctx.restore();
+    }
+    /*绘制文字的方法 drawText(ctx,text,x,y,textAlign,textBaseline)
+    * font='12px Arial'
+    * */
+    function drawText(ctx,text,x,y,textAlign,textBaseline){
+        ctx.save();
+        ctx.font='14px Arial';
+        ctx.textAlign=textAlign;
+        ctx.textBaseline=textBaseline;
+        ctx.fillText(text,x,y);
+        ctx.restore();
+    }
+
+
+    /*======== 四，鼠标交互 ==========*/
+    /*建立提示框 Tip*/
+    class Tip{
+        constructor() {
+            this.text='';
+            this.fontSize=14;
+            this.x=0;
+            this.y=0;
+            this.visible=false;
+            this.padW=15;
+            this.padH=6;
+        }
+        draw(ctx){
+            const {text,fontSize,x,y,visible,padW,padH}=this;
+            if(!visible){return}
+            ctx.save();
+            //字体属性
+            ctx.font=`${fontSize}px arial`;
+            //绘制背景色-矩形
+            const {width}=ctx.measureText(text);
+            ctx.fillStyle='rgba(0,0,0,0.7)';
+            ctx.fillRect(x,y,width+padW*2,fontSize+padH*2);
+            //绘制文字
+            ctx.textBaseline='top';
+            ctx.fillStyle='#fff';
+            ctx.beginPath();
+            ctx.fillText(text,x+padW,y+padH);
+            ctx.restore();
+        }
+    }
+    //实例化提示框
+    const tip=new Tip();
+
+    //监听鼠标移动事件
+    canvas.addEventListener('mousemove',mousemoveFn);
+    function mousemoveFn(event){
+        //鼠标位置
+        const mousePos=getMousePos(event);
+        //遍历系列
+        //判断鼠标是否在系列元素中
+        //如果在，就显示提示文字，设置文字位置和内容
+        //如果不在，就隐藏提示文字
+        for (let item of series){
+            if(containPoint(item,mousePos)){
+                tip.visible=true;
+                tip.x=mousePos.x+10;
+                tip.y=mousePos.y+20;
+                tip.text=item.data;
+                break;
+            }else{
+                tip.visible=false;
+            }
+        }
+        /*按需渲染*/
+        render();
+    }
+
+
+    //渲染
+    render();
+    //渲染方法
+    function render(){
+        ctx.clearRect(0,0,width,height);
+        //绘制坐标系
+        drawCoord(ctx);
+        //绘制系列图像
+        series.forEach((ele)=>{
+            ele.draw(ctx);
+        });
+        //提示框
+        tip.draw(ctx);
+    }
+
+    //判断点是否在图形中
+    //判断点是否矩形中
+    function containPoint(obj,mousePos){
+        const {x,y,width,height}=obj;
+        const t=mousePos.y>y;
+        const b=mousePos.y<y+height;
+        const l=mousePos.x>x;
+        const r=mousePos.x<x+width;
+        return t&&b&&l&&r;
+    }
+    //获取鼠标位置
+    function getMousePos(event){
+        //获取鼠标位置
+        const {clientX,clientY}=event;
+        //获取canvas 边界位置
+        const {top,left}=canvas.getBoundingClientRect();
+        //计算鼠标在canvas 中的位置
+        const x=clientX-left;
+        const y=clientY-top;
+        return {x,y};
+    }
+
+
+
+</script>
+</body>
+</html>

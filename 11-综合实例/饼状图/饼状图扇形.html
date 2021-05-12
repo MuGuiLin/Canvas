@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>demo2</title>
+	<style type="text/css">
+		h1 {
+			text-align: center;
+		}
+
+		canvas {
+			display: block;
+			margin: auto;
+			border: 1px solid purple;
+			background: #CCCCCC;
+		}
+	</style>
+</head>
+
+<body>
+	<h1>饼状图demo2</h1>
+	<hr />
+	<canvas id="canvas" width="600" height="600"></canvas>
+</body>
+
+<script type="text/javascript">
+	let cvs = document.querySelector('#canvas'),
+		ctx = cvs.getContext('2d'),
+		cx = cvs.width / 2, // 300 = 600 / 2
+		cy = cvs.height / 2,
+		mr = 200, //大圆半径
+		nr = 100 //小圆半径
+
+	arr = [
+		{ scale: 0.2 * (2 * Math.PI), color: 'red' },
+		{ scale: 0.25 * (2 * Math.PI), color: 'green' },
+		{ scale: 0.35 * (2 * Math.PI), color: 'blue' },
+		{ scale: 0.1 * (2 * Math.PI), color: 'purple' },
+		{ scale: 0.1 * (2 * Math.PI), color: 'cyan' },
+	];
+
+	//下面大圆
+	ctx.beginPath();
+	ctx.moveTo(cx, cy);
+	ctx.lineTo(cx + mr, cy);
+	ctx.arc(cx, cy, mr, 0, arr[0].scale, false);
+	ctx.lineTo(cx, cy);	//添加一个新点，然后在画布中创建从该点到最后指定点的线条。
+	ctx.fillStyle = arr[0].color;
+	ctx.fill();
+
+	//上面小圆
+	// 			ctx.beginPath();
+	// 			ctx.arc(cx, cx, nr, 0, (2 * Math.PI), false);
+	// 			ctx.fillStyle = 'white';
+	// 			ctx.fill();
+
+	//上面小圆
+	ctx.beginPath();
+	ctx.moveTo(cx, cy);
+	ctx.lineTo(cx + nr, cy);
+	ctx.arc(cx, cy, nr, 0, arr[0].scale, false);
+	ctx.lineTo(cx, cy);
+	ctx.fillStyle = 'rosybrown';
+	ctx.fill();
+
+</script>
+
+</html>
