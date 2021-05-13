@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-饼状图</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: indigo;
+            border: 1px solid gray;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <img src="./img/饼图的核心内容.jpg" alt="" />
+    <img src="./img/饼图引导线的方向.jpg" alt="" />
+    <img src="./img/三角函数基础知识.jpg" alt="" />
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+    </canvas>
+
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        const [width, height] = [window.innerWidth, window.innerHeight];
+
+        // 设置画布宽高
+        canvas.width = 800 || width;
+        canvas.height = 600 || height;
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
+
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
+         * 
+         * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
+         * 
+         * 路局裁剪是基于路径的一种合成方式，它只能使用路径设置裁剪区域，如果是文字的话，就无效。
+         * 透明度合成和全局合成都是基于像素的操作
+         **/
+
+        // 扇形
+        class Sector {
+            constructor(radius = 200, startAngle = 0, endAngle = Math.PI / 2, color = 'red') {
+                this.x = 0;
+                this.y = 0;
+                this.text = '提示文字';
+                this.textAlign = 'left';
+                this.data = 1024;
+                this.color = color;
+                this.radius = radius;
+                this.startAngle = startAngle;
+                this.endAngle = endAngle;
+
+                // 4个点位position
+                this.p1 = { x: 0, y: 0, d: 20 }; // 引导线起始点位（基于圆的外边界偏移20）
+                this.p2 = { x: 0, y: 0, d: 70 }; // 引导线斜线点位 基于p1点d偏移70
+                this.p3 = { x: 0, y: 0, d: 30 }; // 引导线横线点位 基于p2点d偏移30
+                this.p4 = { x: 0, y: 0, d: 10 }; // 提示文字点位 基于p3点d偏移10 
+            };
+
+            // 更新引导线和提示文字的点位
+            updatePos() {
+                const { x, y, radius, startAngle, endAngle, p1, p2, p3, p4 } = this;
+                // 引导线方向
+                const dir = (endAngle - startAngle) / 2 + startAngle;
+
+                // 引导线p1长度
+                const len1 = radius + p1.d;
+                // 引导线p1点位
+                p1.x = Math.cos(dir) * len1 + x;
+                p1.y = Math.sin(dir) * len1 + y;
+
+                // 引导线p2长度
+                const len2 = radius + p2.d;
+                // 引导线p2点位
+                p2.x = Math.cos(dir) * len2 + x;
+                p2.y = Math.sin(dir) * len2 + y;
+
+                // 判断p3点位是在圆的左面还是右面（默认左面）
+                let lr = 1;
+                //如果是右面
+                if (p1.x < x) {
+                    lr = -1;
+                    this.textAlign = 'right';
+                }
+                // 引导线p3点位
+                p3.x = p2.x + p3.d * lr;
+                p3.y = p2.y;
+
+                // 文字p4点位 在 p3点位的侧面
+                p4.x = p3.x + p4.d * lr;
+                p4.y = p2.y;
+
+                // 文字p4点位 在 p3点位的上面
+                // p4.x = p3.x - 30 * lr;
+                // p4.y = p2.y - 10;
+
+            };
+
+            // 绘制
+            draw() {
+                const { x, y, radius, startAngle, endAngle, text, textAlign, color, p1, p2, p3, p4 } = this;
+                context.save();
+                // 扇形块绘制
+                context.beginPath();
+                context.fillStyle = color;
+                context.moveTo(x, y); // 起始点位(圆中心点位)：注扇形一定要加起始点位哦！！
+                context.arc(x, y, radius, startAngle, endAngle, false);
+                context.fill();
+                // 引导线绘制
+                context.beginPath();
+                context.strokeStyle = 'yellow';
+                context.moveTo(p1.x, p1.y); // 由于引导线是要画在饼状图的外部，所在起始点位为p1，而不是起始点位(圆中心点位)
+                context.lineTo(p2.x, p2.y);
+                context.lineTo(p3.x, p3.y);
+                context.stroke();
+                // 提示文字绘制
+                context.fillStyle = 'white';
+                context.font = '16px arail';
+                context.textAlign = textAlign;
+                context.textBaseline = 'middle';
+                context.fillText(text, p4.x, p4.y, canvas.width);
+                context.restore();
+            };
+        };
+
+        // 提示文字
+        class Tip {
+            constructor(x = 0, y = 0) {
+                this.x = x;
+                this.y = y;
+                this.text = '提示文字';
+                this.size = 30;
+                this.show = false;
+                // 内边距
+                this.pw = 20;
+                this.ph = 10;
+            };
+
+            draw(context) {
+                const { x, y, text, size, show, pw, ph } = this;
+                if (show) {
+                    const { width } = context.measureText(text);
+                    context.font = `${size}px arail`; // 注意这行代码的位置，否则会影响文字宽度！
+                    context.save();
+
+                    // 文字背景
+                    context.fillStyle = `rgba(255, 0, 0, 0.6)`;
+                    context.fillRect(x, y, width + pw * 2, size + ph * 1.5);
+
+                    // 文字边框
+                    context.lineWidth = 1;
+                    context.strokeStyle = 'white';
+                    context.strokeRect(x, y, width + pw * 2, size + ph * 1.5);
+                    // 文字
+                    context.textBaseline = 'top';
+                    context.fillStyle = 'white';
+                    context.fillText(text, x + pw, y + ph);
+                    context.restore();
+                }
+            };
+        };
+
+
+        // 判断鼠标是否点在扇形中
+        function isInGraph(item, mpos) {
+            // 解构扇形属性
+            const { x, y, radius, startAngle, endAngle } = item;
+            // 鼠标位 减 图形位
+            const [subX, subY] = [mpos.x - x, mpos.y - y];
+            // 获取鼠标到圆心的距离
+            const len = Math.sqrt(subX * subX + subY * subY);
+            // 判断鼠标到圆心的距离是否小于圆的半径
+            const b1 = len < radius;
+            // 获取鼠标位 减 图形位 得到方向 dir
+            let dir = Math.atan2(subY, subX);
+            if (dir < 0) {
+                dir += Math.PI * 2;
+            }
+            // 判断鼠标向量的方向是否在扇形的夹角之间
+            const b2 = dir > startAngle && dir < endAngle;
+            return b1 && b2;
+        };
+
+        // 获取鼠标在Canvas画布中的位置
+        function getMousePos(event) {
+            // 获取鼠标位置
+            const { clientX, clientY } = event;
+
+            // 获取Canvas画布的边界 // 核心方法：getBoundingClientRect()  https://developer.mozilla.org/zh-CN/docs/Web/API/Element/getBoundingClientRect
+            const { left, top } = canvas.getBoundingClientRect();
+
+            //计算鼠标在canvas 中的位置
+            const x = clientX - left;
+            const y = clientY - top;
+            return { x, y };
+        }; 0
+
+        // 实例化扇形
+        const S = new Sector();
+        S.x = 400;
+        S.y = 250;
+        S.updatePos();
+
+        const S2 = new Sector();
+        S2.x = 400;
+        S2.y = 250;
+        S2.data = 2048;
+        S2.endAngle = Math.PI * 3 / 2;
+        S2.updatePos();
+
+
+        // 实例化文字
+        const T = new Tip(150, 300);
+
+        // 渲染
+        function render() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            S.draw(context);
+            S2.draw(context);
+
+            T.draw(context);
+        };
+        render();
+
+        // 监听鼠标移动
+        canvas.addEventListener('mousemove', function (event) {
+            // 鼠标位置
+            const mpos = getMousePos(event);
+            // 判断鼠标是否在扇形中
+            if (isInGraph(S, mpos)) {
+                // 如果鼠标是在扇形中时，显示文字提示，设置文字提示的位置和提示内容
+                T.x = mpos.x + 20;
+                T.y = mpos.y + 20;
+                T.show = true;
+                T.text = S.data;
+            } else {
+                T.show = false; // 隐藏文字提示
+            }
+
+            if (isInGraph(S2, mpos)) {
+                T.x = mpos.x + 20;
+                T.y = mpos.y + 20;
+                T.show = true;
+                T.text = S2.data;
+            } else {
+                T.show = false;
+            }
+            // 按需渲染
+            render();
+        });
+    </script>
+</body>
+
+</html>
