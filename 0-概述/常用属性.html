@@ -32,10 +32,16 @@
 <body onmousemove="YieRu(event)" onmouseout="YieExit()">
 	<h1 style="text-align: center;">THML5 Canvas标签</h1>
 	<hr />
+	<b>
+		Canvas的精彩：
+		Canvas精彩之处在于程序算法和艺术的结合。
+		它可以用理性的逻辑算法来寻找艺术中美的规律。
+		若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+	</b>
+	<h2 id="showXY"></h2>
 	<ul>
 		<li>Canvas标签必须和js脚本配合才能用。</li>
 		<li>Cancas.getContext("2d")//绘图对象</li>
-		<li id="showXY"></li>
 
 		<li>canvas元素本身是没有绘图能力的。所有的绘制工作必须在 JavaScript 内部完成：</li>
 		<li>context.getContext("2d"); //上下文对象是内建的 HTML5 对象，所有绘制都是在该对象上进行！！</li>
@@ -69,9 +75,9 @@
 		<li>context.arcTo(x1, y1, x2, y2, radius);切线圆弧</li>
 
 		<li>const lgr = ctx.createLinearGradient(100, 100, 600, 400); //渐变</li>
-        <li>lgr.addColorStop(0, 'red');</li>
-        <li>lgr.addColorStop(0.5, 'rgb(0, 255, 0)');</li>
-        <li>lgr.addColorStop(1, 'blue');</li>
+		<li>lgr.addColorStop(0, 'red');</li>
+		<li>lgr.addColorStop(0.5, 'rgb(0, 255, 0)');</li>
+		<li>lgr.addColorStop(1, 'blue');</li>
 
 		<li>context.drawImage(Image, dX, dY, dWidth, dHeight);</li>
 		<li>context.getImageData(sx, sy, sw, sh);</li>
@@ -88,9 +94,19 @@
 <script type="text/javascript">
 
 	YieRu = function (ev) {
-		var x = ev.clientX;//当前鼠标X位置
-		var y = ev.clientY;//当前鼠标Y位置
-		document.getElementById("showXY").innerHTML = "鼠标位置：X坐标:" + x + "，Y坐标:" + y + "";
+		const dom = document.getElementById("showXY");
+		const x = ev.clientX;//当前鼠标X位置
+		const y = ev.clientY;//当前鼠标Y位置
+
+		// 获取元素CSS样式
+		// console.log(getComputedStyle(dom));
+
+		// 获取元素位置信息{ width, height, top, bottom, left, right, x, y}
+		// console.log(dom.getBoundingClientRect());
+		const { top, left } = dom.getBoundingClientRect();
+
+		dom.style.cssText = `position: absolute; left:${x}px; top:${y}px; color: blue;`;
+		dom.innerHTML = "<b>鼠标位置：X坐标:" + x + "，Y坐标:" + y + "，元素位置：top:" + top + "left:" + left;
 	}
 	YieExit = function () {
 		document.getElementById("showXY").innerHTML = "";//清空鼠标位置

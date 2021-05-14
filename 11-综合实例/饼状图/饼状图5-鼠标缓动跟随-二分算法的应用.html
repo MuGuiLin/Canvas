@@ -155,11 +155,30 @@
                 this.x = x;
                 this.y = y;
                 this.text = '提示文字';
-                this.size = 30;
-                this.show = false;
+                this.size = 30;     // 文字大小
+                this.show = false;  // 是否显示
                 // 内边距
                 this.pw = 20;
                 this.ph = 10;
+
+                this.nx = 0;        // 下一个x的位置
+                this.ny = 0;        // 下一个y的位置
+                this.rate = 0.02;   // 移动距离在总距离中的占比
+                this.state = 0;     // 移动状态：0不移动，1移动
+            };
+
+            // 更新提示文字位置 基于鼠标点求提示的一下次移动位置
+            updatePos() {
+                const { x, y, nx, ny, show, rate, state } = this;
+                if (!show || !state) {
+                    return
+                }
+                const [sunX, sunY] = [nx - x, ny - y];
+                this.x += sunX * rate;
+                this.y += sunY * rate;
+                if (Math.sqrt(sunX * sunX + sunY * sunY) < 1) {
+                    this.state = 0;
+                }
             };
 
             draw(context) {
@@ -225,15 +244,6 @@
         const S = new Sector();
         S.x = 400;
         S.y = 250;
-        S.updatePos();
-
-        const S2 = new Sector();
-        S2.x = 400;
-        S2.y = 250;
-        S2.data = 2048;
-        S2.endAngle = Math.PI * 3 / 2;
-        S2.updatePos();
-
 
         // 实例化文字
         const T = new Tip(150, 300);
@@ -242,9 +252,13 @@
         function render() {
             context.clearRect(0, 0, canvas.width, canvas.height);
             S.draw(context);
-            S2.draw(context);
+            S.updatePos();
 
             T.draw(context);
+            T.updatePos();
+
+            //连线渲染
+            requestAnimationFrame(render);
         };
         render();
 
@@ -255,22 +269,17 @@
             // 判断鼠标是否在扇形中
             if (isInGraph(S, mpos)) {
                 // 如果鼠标是在扇形中时，显示文字提示，设置文字提示的位置和提示内容
-                T.x = mpos.x + 20;
-                T.y = mpos.y + 20;
+                T.nx = mpos.x + 20;
+                T.ny = mpos.y + 20;
+                T.state = 1;
                 T.show = true;
                 T.text = S.data;
+
             } else {
+                T.state = 0;
                 T.show = false; // 隐藏文字提示
             }
 
-            if (isInGraph(S2, mpos)) {
-                T.x = mpos.x + 20;
-                T.y = mpos.y + 20;
-                T.show = true;
-                T.text = S2.data;
-            } else {
-                T.show = false;
-            }
             // 按需渲染
             render();
         });
