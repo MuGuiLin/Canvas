@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-扩展优化</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: indigo;
+            border: 1px solid gray;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+
+        Canvas的精彩：
+        Canvas精彩之处在于程序算法和艺术的结合。
+        它可以用理性的逻辑算法来寻找艺术中美的规律。
+        若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+    </canvas>
+
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
+
+        const [width, height] = [window.innerWidth, window.innerHeight];
+
+        // 设置画布宽高
+        canvas.width = width;
+        canvas.height = height;
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
+         *
+         * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
+         *
+         * Canvas的精彩：
+         *    Canvas精彩之处在于程序算法和艺术的结合。
+         *    它可以用理性的逻辑算法来寻找艺术中美的规律。
+         *    若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+         **/
+
+        // 逐帧动画只考虑动画的下一帧状态，例如：小球的速度和加速度运动
+
+        // 小球
+        class Ball {
+            constructor(r = 30, c = 'blue') {
+                this.x = 0;
+                this.y = 0;
+                this.r = r;
+                this.c = c;
+            };
+            draw() {
+                const { x, y, r, c } = this;
+                context.save();
+                context.beginPath();
+
+                context.arc(x, y, r, 0, Math.PI * 2, false);
+                context.fillStyle = c;
+                context.fill();
+
+                context.restore();
+            };
+        };
+
+        const B = new Ball();
+        B.x = width / 2;
+        B.y = 50;
+        B.draw();
+
+        // 起始时间
+        const startTime = new Date();
+
+        // 动画时长（第1帧 到 第2帧 的时间）
+        const timeLen = 2000;  // 2秒
+
+        // 两个关键帧属性
+        const attr1 = { y: B.y };
+        const attr2 = { y: height - B.r };
+
+        // 动画帧
+        let frame = null;
+
+        // 动画结束时 清理关键帧
+        function complete() {
+            cancelAnimationFrame(frame);
+        };
+
+        // 插值算法（线性插值）还有二次贝塞尔曲线算法、三次贝塞尔曲线算法等
+        function inter(t, p0, p1) {
+            return p0 + (p1 - p0) * t;
+        };
+
+        // 更新方法
+        function update() {
+            // 获取当前小球运动时长：当前时间 减去动画起始时间
+            let curTimeLen = new Date() - startTime;
+            // 判断小球结束时，校正小球位置，并执行完成方法
+            if (curTimeLen > timeLen) {
+                curTimeLen = timeLen;
+                complete();
+            }
+            // 获取当前小球运动时长 和 总时长的比值
+            const t = curTimeLen / timeLen;
+            // 通过时长比值，在两个关键帧之间 计算属性插值
+            B.y = inter(t, attr1.y, attr2.y);
+        };
+
+        // 连续渲染
+        !(function render() {
+            frame = requestAnimationFrame(render);
+            update();
+            // 清除画布
+            context.clearRect(0, 0, width, height);
+            B.draw();
+
+            console.log(111);
+        })();
+    </script>
+</body>
+
+</html>

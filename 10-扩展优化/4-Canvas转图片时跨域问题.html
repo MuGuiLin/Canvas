@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-扩展优化</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: indigo;
+            border: 1px solid gray;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <img src="./img/Canvas转图片时跨域问题.jpg" alt="" />
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+
+        Canvas的精彩：
+        Canvas精彩之处在于程序算法和艺术的结合。
+        它可以用理性的逻辑算法来寻找艺术中美的规律。
+        若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+    </canvas>
+    <img id="image" src="" alt="" />
+
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
+         *
+         * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
+         *
+         * Canvas的精彩：
+         *    Canvas精彩之处在于程序算法和艺术的结合。
+         *    它可以用理性的逻辑算法来寻找艺术中美的规律。
+         *    若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+         **/
+
+        const img = new Image();
+        img.setAttribute("crossOrigin", 'Anonymous');   // https://developer.mozilla.org/zh-CN/docs/Web/HTML/Attributes/crossorigin
+        img.src = 'https://img.kaikeba.com/80541111101202zvrc.png';
+        // img.src = 'http://admin.muguilin.com/img/bg/bg-1920-1080-09.jpg'; // 注：如果图像源设置的防盗链时，即使设置img.setAttribute("crossOrigin", 'Anonymous');也没用哦！！
+        img.onload = () => {
+            // 设置画布宽高
+            const { width, height } = img;
+            canvas.width = width;
+            canvas.height = height;
+
+            context.drawImage(img, 0, 0, width, height);
+
+            // https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLCanvasElement/toDataURL
+            const imgURL = canvas.toDataURL("image/jpeg", 1.0); // 默认为 image/png
+            console.log('Cangas画面转图片：', imgURL);
+
+            document.querySelector('#image').src = imgURL;
+
+        };
+
+    </script>
+</body>
+
+</html>

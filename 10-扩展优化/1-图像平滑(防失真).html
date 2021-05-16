@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-扩展优化</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: indigo;
+            border: 1px solid gray;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+
+        #canvas2 {
+            /* width: 100px;
+            height: 100px; */
+            background-color: rgb(255, 0, 106);
+            border: 1px solid gray;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <img src="./img/让Canvas 分辨率适配不同设备.jpg" alt="" />
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+
+        Canvas的精彩：
+        Canvas精彩之处在于程序算法和艺术的结合。
+        它可以用理性的逻辑算法来寻找艺术中美的规律。
+        若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+    </canvas>
+    <canvas id="canvas2" width="300" height="150"></canvas>
+
+    <script>
+        {
+            // 获取画布DOM
+            const canvas = document.querySelector('#canvas');
+            const [width, height] = [window.innerWidth, window.innerHeight];
+
+            // 设置画布宽高
+            canvas.width = 860 || width;
+            canvas.height = 200 || height;
+
+            // 获取画布上下文对象
+            const context = canvas.getContext('2d');
+
+            /**
+             * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
+             *
+             * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
+             *
+             * Canvas的精彩：
+             *    Canvas精彩之处在于程序算法和艺术的结合。
+             *    它可以用理性的逻辑算法来寻找艺术中美的规律。
+             *    若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+             **/
+
+            context.font = '66px sans-serif';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillStyle = 'white';
+            context.fillText('没做分辨率适配的CANVAS', canvas.width / 2, canvas.height / 2, canvas.width);
+
+        }
+
+
+        // 做了分辨率适配的CANVAS 注：要放大屏幕显示比率后，才能看到对比效果哦！！
+        {
+            // 获取画布DOM
+            const canvas = document.querySelector('#canvas2');
+
+            // 设置画布宽高
+            canvas.width = 860;
+            canvas.height = 200;
+
+            // 获取画布上下文对象
+            const context = canvas.getContext('2d');
+
+            /**
+             * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
+             *
+             * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
+             *
+             * Canvas的精彩：
+             *    Canvas精彩之处在于程序算法和艺术的结合。
+             *    它可以用理性的逻辑算法来寻找艺术中美的规律。
+             *    若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+             **/
+
+            // 1、通过浏览器的window对象，获取设备的像素比
+            const ratio = window.devicePixelRatio;
+            console.log('获取设备的像素比，改变浏览器的显示比例试试！！', ratio);
+
+            // 2、设置Canvas画布的大小 随着像素比进行缩放
+            const { width, height } = canvas;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            context.scale(ratio, ratio);
+
+            // 3、通过CSS 将Canvas画布大小设为缩放之前的大小
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+
+
+            context.font = '66px sans-serif';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillStyle = 'white';
+            context.fillText('做了分辨率适配的CANVAS', width / 2, height / 2, width);
+
+        }
+    </script>
+</body>
+
+</html>
