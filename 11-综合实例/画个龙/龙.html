@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-画个龙</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: indigo;
+            border: 1px solid gray;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+
+        .container {
+            position: relative;
+            border: 1px solid gray;
+        }
+
+        .bubble {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: cyan;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+
+        Canvas的精彩：
+        Canvas精彩之处在于程序算法和艺术的结合。
+        它可以用理性的逻辑算法来寻找艺术中美的规律。
+        若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+    </canvas>
+
+    <canvas id="canvas2" width="300" height="150"></canvas>
+    <section id="container" class="container"></section>
+
+    <script>
+        {
+            // 获取画布DOM
+            const canvas = document.querySelector('#canvas');
+
+            // 获取画布上下文对象
+            const context = canvas.getContext('2d');
+
+
+            /**
+             * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
+             *
+             * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
+             *
+             * 路局裁剪是基于路径的一种合成方式，它只能使用路径设置裁剪区域，如果是文字的话，就无效。
+             * 透明度合成和全局合成都是基于像素的操作
+             **/
+
+            const img = new Image();
+            // img.setAttribute("crossOrigin", 'Anonymous');
+            img.src = './img/龙-剪纸.jpg';
+
+            img.onload = _ => {
+                const { width, height } = img;
+
+                // 设置画布宽高
+                canvas.width = width;
+                canvas.height = height;
+
+                context.drawImage(img, 0, 0, width, height);
+
+                const imgData = context.getImageData(0, 0, width, height);
+                const pxArr = imgData.data;
+
+                context.fillStyle = 'white';
+                context.fillRect(0, 0, width, height);
+
+                let size = 6;
+                // 像行列列遍历 
+                for (let y = 0; y < img.height; y += size) {
+                    for (let x = 0; x < img.width; x += size) {
+                        // 见：求r在像素集合里的索引位置ind
+                        const i = (y * img.width + x) * 4;
+                        const [r, g, b] = [
+                            pxArr[i],
+                            pxArr[i + 1],
+                            pxArr[i + 2]
+                        ];
+                        // console.log(r + g + b);
+                        context.fillStyle = `RGB(${r}, ${g}, ${b})`;
+                        context.fillRect(x, y, size, size);
+                        // if (r + g + b == 0) {
+                        //     context.fillStyle = `red`;
+                        //     context.fillRect(x, y, size, size);
+                        // }
+                    }
+                };
+            }
+
+        };
+
+
+
+        // https://juejin.cn/post/6963476650356916254
+        {
+            var canvas = document.getElementById("canvas2");
+            var ctx = canvas.getContext("2d");
+
+            var image = new Image();
+            image.src = "./img/dragon.jpg";
+            image.onload = function () {
+                canvas.width = image.width;
+                canvas.height = image.height;
+
+                ctx.drawImage(image, 0, 0);
+
+                var imageData = ctx.getImageData(0, 0, image.width, image.height).data;
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(0, 0, image.width, image.height);
+
+                var gap = 6;
+
+                for (var h = 0; h < image.height; h += gap) {
+                    for (var w = 0; w < image.width; w += gap) {
+                        var position = (image.width * h + w) * 4;
+                        var r = imageData[position], g = imageData[position + 1], b = imageData[position + 2];
+
+                        if (r + g + b == 0) {
+                            ctx.fillStyle = "#000";
+                            ctx.fillRect(w, h, 4, 4);
+                        }
+                    }
+                };
+
+                var dragonContainer = document.getElementById("container");
+                dragonContainer.style.width = image.width;
+                dragonContainer.style.height = image.height;
+                var dragonScale = 2;
+
+                for (var h = 0; h < image.height; h += gap) {
+                    for (var w = 0; w < image.width; w += gap) {
+                        var position = (image.width * h + w) * 4;
+                        var r = imageData[position], g = imageData[position + 1], b = imageData[position + 2];
+
+                        if (r + g + b == 0) {
+                            var bubble = document.createElement("img");
+                            bubble.src = "bubble.png";
+                            bubble.setAttribute("class", "bubble");
+
+                            var bubbleSize = Math.random() * 10 + 20;
+                            bubble.style.left = (w * dragonScale - bubbleSize / 2) + "px";
+                            bubble.style.top = (h * dragonScale - bubbleSize / 2) + "px";
+                            bubble.style.width = bubble.style.height = bubbleSize + "px";
+                            bubble.style.animationDuration = Math.random() * 6 + 4 + "s";
+
+                            dragonContainer.appendChild(bubble);
+                        }
+                    }
+                }
+            };
+
+        };
+
+    </script>
+</body>
+
+</html>
