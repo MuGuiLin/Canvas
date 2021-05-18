@@ -136,8 +136,8 @@ canva.onclick = function(event){
 				mywin[k]++;
 				pcwin[k] = 6;
 				if(mywin[k] == 5){
-					alert('你太牛B啦，你赢啦！');
 					over = true;
+					alert('你太牛B啦，你赢啦！');
 				}
 			}
 		}
@@ -234,8 +234,8 @@ var ComputerAiFn = function(){
 			pcwin[k]++;
 			mywin[k] = 6;
 			if(pcwin[k] == 5){
-				alert('哈哈电脑赢啦！');
 				over = true;
+				alert('哈哈电脑赢啦！');
 			}
 		}
 	}

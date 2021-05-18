@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HTML5-Canvas-饼状图</title>
+    <title>HTML5-Canvas-扩展优化</title>
     <style>
         body {
             margin: 0;
@@ -26,7 +26,6 @@
 </head>
 
 <body>
-    <img src="./img/饼图效果.jpg" alt="" />
     <canvas id="canvas" width="300" height="150">
         对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
         canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
@@ -42,60 +41,87 @@
         // 获取画布DOM
         const canvas = document.querySelector('#canvas');
 
-        const [width, height] = [window.innerWidth, window.innerHeight];
-
-        // 设置画布宽高
-        canvas.width = 800 || width;
-        canvas.height = 600 || height;
-
         // 获取画布上下文对象
         const context = canvas.getContext('2d');
 
+        const [width, height] = [window.innerWidth, window.innerHeight];
+
+        // 设置画布宽高
+        canvas.width = width;
+        canvas.height = height;
 
         /**
          * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
-         * 
+         *
          * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
-         * 
-         * 路局裁剪是基于路径的一种合成方式，它只能使用路径设置裁剪区域，如果是文字的话，就无效。
-         * 透明度合成和全局合成都是基于像素的操作
+         *
+         * Canvas的精彩：
+         *    Canvas精彩之处在于程序算法和艺术的结合。
+         *    它可以用理性的逻辑算法来寻找艺术中美的规律。
+         *    若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
          **/
 
-        // 扇形
-        class Sector {
-            constructor(radius = 200, startAngle = 0, endAngle = Math.PI / 2, color = 'red') {
+        // 逐帧动画只考虑动画的下一帧状态，例如：小球的速度和加速度运动
+
+        // 小球
+        class Ball {
+            constructor(r = 30, c = 'blue') {
                 this.x = 0;
                 this.y = 0;
-                this.text = '提示文字';
-                this.data = 1024;
-                this.color = color;
-                this.radius = radius;
-                this.startAngle = startAngle;
-                this.endAngle = endAngle;
-
-                // 4中点位
-                this.p1 = { x: 0, y: 0, d: 20 };
-                this.p2 = { x: 0, y: 0, d: 70 }; // 基于圆的边界偏移70
-                this.p3 = { x: 0, y: 0, d: 20 }; // 基于p2点偏移20
-                this.p4 = { x: 0, y: 0, d: 20 }; // 基于p3点偏移10
+                this.r = r;
+                this.c = c;
             };
-
             draw() {
-                const { x, y, radius, startAngle, endAngle, text, color, p1, p2, p3, p4 } = this;
+                const { x, y, r, c } = this;
                 context.save();
                 context.beginPath();
-                context.fillStyle = color;
-                context.moveTo(x, y); // 起始点位：注扇形一定要加起始点位哦！！
-                context.arc(x, y, radius, startAngle, endAngle, false);
+
+                context.arc(x, y, r, 0, Math.PI * 2, false);
+                context.fillStyle = c;
                 context.fill();
+
                 context.restore();
             };
         };
 
-        const S = new Sector();
-        S.x = 400;
-        S.y = 250;
-        S.draw();
+        const B = new Ball();
+        B.x = width / 2;
+        B.y = 50;
+        B.draw();
+
+        // 移动速度（像素/毫秒）
+        let speed = 0.5;
+
+        // 计进器
+        let items = new Date();
+
+        // 动画帧
+        let frame = null;
+
+        // 停止条件
+        let stop = height - B.r;
+
+        !(function render() {
+            // 计算时间差
+            const now = new Date();
+            const diff = now - items;
+            items = now;
+            // 清除画布
+            context.clearRect(0, 0, width, height);
+
+            // 更新小球位置（匀速运动）
+            B.y += speed * diff;
+            if (B.y < stop) {
+                frame = requestAnimationFrame(render);
+            } else {
+                B.y = stop;
+                cancelAnimationFrame(frame);
+            }
+            B.draw();
+
+        })();
+
+
     </script>
 </body>
 

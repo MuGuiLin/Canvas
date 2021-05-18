@@ -149,18 +149,131 @@
             };
         };
 
+        // 提示文字
+        class Tip {
+            constructor(x = 0, y = 0) {
+                this.x = x;
+                this.y = y;
+                this.text = '提示文字';
+                this.size = 30;
+                this.show = false;
+                // 内边距
+                this.pw = 20;
+                this.ph = 10;
+            };
+
+            draw(context) {
+                const { x, y, text, size, show, pw, ph } = this;
+                if (show) {
+                    const { width } = context.measureText(text);
+                    context.font = `${size}px arail`; // 注意这行代码的位置，否则会影响文字宽度！
+                    context.save();
+
+                    // 文字背景
+                    context.fillStyle = `rgba(255, 0, 0, 0.6)`;
+                    context.fillRect(x, y, width + pw * 2, size + ph * 1.5);
+
+                    // 文字边框
+                    context.lineWidth = 1;
+                    context.strokeStyle = 'white';
+                    context.strokeRect(x, y, width + pw * 2, size + ph * 1.5);
+                    // 文字
+                    context.textBaseline = 'top';
+                    context.fillStyle = 'white';
+                    context.fillText(text, x + pw, y + ph);
+                    context.restore();
+                }
+            };
+        };
+
+
+        // 判断鼠标是否点在扇形中
+        function isInGraph(item, mpos) {
+            // 解构扇形属性
+            const { x, y, radius, startAngle, endAngle } = item;
+            // 鼠标位 减 图形位
+            const [subX, subY] = [mpos.x - x, mpos.y - y];
+            // 获取鼠标到圆心的距离
+            const len = Math.sqrt(subX * subX + subY * subY);
+            // 判断鼠标到圆心的距离是否小于圆的半径
+            const b1 = len < radius;
+            // 获取鼠标位 减 图形位 得到方向 dir
+            let dir = Math.atan2(subY, subX);
+            if (dir < 0) {
+                dir += Math.PI * 2;
+            }
+            // 判断鼠标向量的方向是否在扇形的夹角之间
+            const b2 = dir > startAngle && dir < endAngle;
+            return b1 && b2;
+        };
+
+        // 获取鼠标在Canvas画布中的位置
+        function getMousePos(event) {
+            // 获取鼠标位置
+            const { clientX, clientY } = event;
+
+            // 获取Canvas画布的边界 // 核心方法：getBoundingClientRect()  https://developer.mozilla.org/zh-CN/docs/Web/API/Element/getBoundingClientRect
+            const { left, top } = canvas.getBoundingClientRect();
+
+            //计算鼠标在canvas 中的位置
+            const x = clientX - left;
+            const y = clientY - top;
+            return { x, y };
+        }; 0
+
+        // 实例化扇形
         const S = new Sector();
         S.x = 400;
         S.y = 250;
         S.updatePos();
-        S.draw();
 
         const S2 = new Sector();
         S2.x = 400;
         S2.y = 250;
+        S2.data = 2048;
         S2.endAngle = Math.PI * 3 / 2;
         S2.updatePos();
-        S2.draw();
+
+
+        // 实例化文字
+        const T = new Tip(150, 300);
+
+        // 渲染
+        function render() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            S.draw(context);
+            S2.draw(context);
+
+            T.draw(context);
+        };
+        render();
+
+        // 监听鼠标移动
+        canvas.addEventListener('mousemove', function (event) {
+            // 鼠标位置
+            const mpos = getMousePos(event);
+            // 判断鼠标是否在扇形中
+            if (isInGraph(S, mpos)) {
+                // 如果鼠标是在扇形中时，显示文字提示，设置文字提示的位置和提示内容
+                T.x = mpos.x + 20;
+                T.y = mpos.y + 20;
+                T.show = true;
+                T.text = S.data;
+            } else {
+                T.show = false; // 隐藏文字提示
+            }
+
+            if (isInGraph(S2, mpos)) {
+                T.x = mpos.x + 20;
+                T.y = mpos.y + 20;
+                T.show = true;
+                T.text = S2.data;
+            } else {
+                T.show = false;
+            }
+            // 按需渲染
+            render();
+        });
     </script>
 </body>
 

@@ -5,18 +5,19 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HTML5-Canvas-图形绘制</title>
+    <title>HTML5-Canvas-饼状图</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            overflow: hidden;
+            /* overflow: hidden; */
         }
 
         #canvas {
             /* width: 100px;
             height: 100px; */
             background-color: indigo;
+            border: 1px solid gray;
 
             /*点击穿透*/
             /* pointer-events: none; */
@@ -25,7 +26,7 @@
 </head>
 
 <body>
-    <img src="./img/水滴.jpg" alt="" />
+    <img src="./img/缓动跟随之二分法.jpg" alt="" />
     <canvas id="canvas" width="300" height="150">
         对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
         canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
@@ -36,46 +37,67 @@
         它可以用理性的逻辑算法来寻找艺术中美的规律。
         若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
     </canvas>
+
     <script>
         // 获取画布DOM
         const canvas = document.querySelector('#canvas');
 
+        const [width, height] = [window.innerWidth, window.innerHeight];
+
         // 设置画布宽高
-        canvas.width = 800;
-        canvas.height = 600;
+        canvas.width = 800 || width;
+        canvas.height = 600 || height;
 
         // 获取画布上下文对象
-        const ctx = canvas.getContext('2d');
+        const context = canvas.getContext('2d');
+
 
         /**
          * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
          * 
          * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
+         * 
          **/
 
-        ctx.lineWidth = 10;         // 描边宽度
-        ctx.strokeStyle = 'blue';   // 描边颜色
-        ctx.fillStyle = 'cyan';     // 填充颜色
+        // 已知A、B两点，求A、B两点的中间点C
+        const A = { x: 50, y: 50 };     // 起点
+        const B = { x: 400, y: 400 };   // 终点
+        const C = { x: 0, y: 0 };       // 下一步要到达的点
+        const n = 0.5;                  // 比值(即A与B之间矩离的一半)
 
-        ctx.beginPath();
-        ctx.moveTo(400, 500);
-        ctx.quadraticCurveTo(
-            550, 300,  // 300：左右拉，10：上下拉
-            550, 200
-        );
-        ctx.stroke();
+        // 二分算法
+        const AB = {
+            x: B.x - A.x,
+            y: B.y - A.y,
+        };
 
-        ctx.beginPath();
-        ctx.arc(400, 200, 150, 0, Math.PI * 2, 0);
-        ctx.stroke();
-      
-        ctx.beginPath();
-        ctx.moveTo(400, 500);
-        ctx.quadraticCurveTo(
-            220, 200,  // 300：左右拉，10：上下拉
-            250, 200
-        );
-        ctx.stroke();
+        // 差什向量
+        C.x = AB.x * n + A.x;
+        C.y = AB.y * n + A.y;
+
+        // 直线
+        context.beginPath();
+        context.moveTo(A.x, A.y);
+        context.lineTo(B.x, B.y);
+        context.stroke();
+
+        // 起点 A
+        context.beginPath();
+        context.arc(A.x, A.y, 5, 0, Math.PI * 2, false);
+        context.fill();
+
+        // 终点 B
+        context.beginPath();
+        context.arc(B.x, B.y, 5, 0, Math.PI * 2, false);
+        context.fill();
+
+        // 下一步要到达的点 C
+        context.beginPath();
+        context.arc(C.x, C.y, 10, 0, Math.PI * 2, false);
+        context.fillStyle = 'blue';
+        context.fill();
+
+        context.restore();
 
     </script>
 </body>

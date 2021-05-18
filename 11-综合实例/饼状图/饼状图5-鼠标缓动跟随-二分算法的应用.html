@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-饼状图</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: indigo;
+            border: 1px solid gray;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <img src="./img/饼图的核心内容.jpg" alt="" />
+    <img src="./img/饼图引导线的方向.jpg" alt="" />
+    <img src="./img/三角函数基础知识.jpg" alt="" />
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+
+        Canvas的精彩：
+        Canvas精彩之处在于程序算法和艺术的结合。
+        它可以用理性的逻辑算法来寻找艺术中美的规律。
+        若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+    </canvas>
+
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        const [width, height] = [window.innerWidth, window.innerHeight];
+
+        // 设置画布宽高
+        canvas.width = 800 || width;
+        canvas.height = 600 || height;
+
+        // 获取画布上下文对象
+        const ctx = canvas.getContext('2d');
+
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
+         * 
+         * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
+         * 
+         * 路局裁剪是基于路径的一种合成方式，它只能使用路径设置裁剪区域，如果是文字的话，就无效。
+         * 透明度合成和全局合成都是基于像素的操作
+         **/
+
+        class Sector {
+            constructor(radius, start, end, color = 'chocolate') {
+                this.radius = 0;
+                this.realRad = radius;
+                this.expandRad = radius + 20;
+                this.startAngle = start;
+                this.endAngle = end;
+                this.color = color;
+                this.x = 0;
+                this.y = 0;
+                this.text = '标签文字';
+                this.data = 100;
+                this.textAlign = 'left';
+
+                this.p1 = { x: 0, y: 0, d: 20 };
+                this.p2 = { x: 0, y: 0, d: 70 };
+                this.p3 = { x: 0, y: 0, d: 20 };
+                this.p4 = { x: 0, y: 0, d: 10 };
+
+                this.vr = 0;
+                this.ar = 0.03;
+                this.bounce = 0.6;
+
+                this.state = 0;
+            };
+            /*更新引导线点位，基于圆形位置、半径、起始弧度，结束弧度
+            *   引线方向dir = 起始弧度+扇形弧度的一半
+            *   p1到圆心的距离p1Len = 半径+偏移距离22
+            *   p1点位，基于方向和长度计算x,y 值
+            *   p2点位同理，自半径偏移70
+            *   根据p2的x点位和圆心x点位的关系，获取之后点位的绘制方向和文本对齐方式
+            *   p3点位，x自p2偏移20，y和p2一致
+            *   p4点位，x自p3偏移10，y和p2一致
+            * */
+            updatePoints() {
+                const { realRad, startAngle, endAngle, x, y, p1, p2, p3, p4 } = this;
+                const dir = (endAngle - startAngle) / 2 + startAngle;
+                const p1Len = realRad + p1.d;
+                const p2Len = realRad + p2.d;
+                p1.x = Math.cos(dir) * p1Len + x;
+                p1.y = Math.sin(dir) * p1Len + y;
+                p2.x = Math.cos(dir) * p2Len + x;
+                p2.y = Math.sin(dir) * p2Len + y;
+                p3.y = p2.y;
+                p4.y = p2.y;
+                let n = 1;
+                if (p2.x < x) {
+                    n = -1;
+                    this.textAlign = 'right';
+                }
+                p3.x = p2.x + p3.d * n;
+                p4.x = p3.x + p4.d * n;
+            };
+
+            /*基于state 状态更新半径
+            *   0 初始状态，绘图半径变大到实际半径 expand(时间差,目标半径)
+            *   1 鼠标划上，绘图半径变大到扩展半径 expand(时间差,目标半径)
+            *   2 鼠标划出，绘图半径缩小到实际半径 shrink(时间差,目标半径)
+            * */
+            updateRad(diff) {
+                const { state, realRad, expandRad } = this;
+                switch (state) {
+                    case 0:
+                        this.expand(diff, realRad);
+                        break;
+                    case 1:
+                        this.expand(diff, expandRad);
+                        break;
+                    case 2:
+                        this.shrink(diff, realRad);
+                        break;
+                }
+            };
+            /*半径扩展动画expand(时间差，结束状态)
+            *   速度+=加速度
+            *   半径+=速度*时间差
+            *   若半径大于终点
+            *       半径=终点
+            *       速度反弹
+            * */
+            expand(diff, endR) {
+                const { ar, bounce } = this;
+                this.vr += ar;
+                this.radius += this.vr * diff;
+                if (this.radius > endR) {
+                    this.radius = endR;
+                    this.vr *= -bounce;
+                }
+
+            };
+            /*半径收缩动画shrink(时间差，结束状态)
+            *   速度-=加速度
+            *   半径+=速度*时间差
+            *   若半径小于终点
+            *       半径=终点
+            *       速度反弹
+            * */
+            shrink(diff, endR) {
+                const { ar, bounce } = this;
+                this.vr -= ar;
+                this.radius += this.vr * diff;
+                if (this.radius < endR) {
+                    this.radius = endR;
+                    this.vr *= -bounce;
+                }
+            };
+
+            /*绘图
+            *   绘制扇形
+            *   绘制引导线
+            *   绘制标签文字
+            * */
+            draw(ctx) {
+                const { x, y, radius, startAngle, endAngle, color, p1, p2, p3, p4, text, textAlign } = this;
+                //保存状态
+                ctx.save();
+                /*绘制扇形 arc() */
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.arc(x, y, radius, startAngle, endAngle);
+                ctx.fillStyle = color;
+                ctx.fill();
+                /*绘制引导线 lineTo() */
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.lineTo(p3.x, p3.y);
+                ctx.strokeStyle = 'white';
+                ctx.stroke();
+                /*绘制标签文字 fillText()*/
+                ctx.fillStyle = 'white';
+                ctx.textBaseline = 'middle';
+                ctx.textAlign = textAlign;
+                ctx.font = '14px Arial';
+                ctx.fillText(text, p4.x, p4.y);
+                //还原上一次保存的状态
+                ctx.restore();
+            }
+        };
+
+        /*提示 Tip
+        *   text 文字内容
+        *   fontSize 文字大小
+        *   x,y 位置
+        *   visible 可见性
+        *   nx,ny 下一个点的位置 -------
+        *   rate 移动距离在总距离中的占比 -------
+        *   state 移动状态 -------
+        *       0 不移动
+        *       1 移动
+        * */
+        class Tip {
+            constructor() {
+                this.text = '';
+                this.fontSize = 14;
+                this.x = 0;
+                this.y = 0;
+                this.visible = false;
+
+                this.nx = 0;
+                this.ny = 0;
+                this.rate = 0.05;
+                this.state = 0;
+            }
+            /*更新提示位置 - 基于鼠标点求提示的下一次移动位置*/
+            updatePos() {
+                const { x, y, nx, ny, rate, state, visible } = this;
+                if (!visible || !state) { return }
+                const [sunX, subY] = [
+                    nx - x,
+                    ny - y
+                ]
+                this.x += sunX * rate;
+                this.y += subY * rate;
+                if (Math.sqrt(sunX * sunX + subY * subY) < 1) {
+                    console.log(0);
+                    this.state = 0;
+                }
+
+            }
+            draw(ctx) {
+                const { x, y, fontSize, visible, text } = this;
+                const [padW, padH] = [15, 8];
+                if (!visible) { return }
+                ctx.save();
+                ctx.font = `${fontSize}px arial`;  // 注意这行代码的位置，否则会影响文字宽度！
+                //获取文字宽度
+                const { width } = ctx.measureText(text);
+                //绘制填充矩形
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'white';
+                ctx.strokeRect(x, y, width + padW * 2, fontSize + padH * 2);
+                ctx.fillStyle = `rgba(0, 0, 255, 0.6)`;
+                ctx.fillRect(x, y, width + padW * 2, fontSize + padH * 2);
+                //绘制文字
+                ctx.textBaseline = 'top';
+                ctx.fillStyle = '#fff';
+                ctx.fillText(text, x + padW, y + padH);
+                ctx.restore();
+            };
+        };
+
+        //判断点是否在图形中
+        function containPoint(obj, mousePos) {
+            const { x, y, radius, startAngle, endAngle } = obj;
+            //鼠标位减图形位
+            const [subX, subY] = [mousePos.x - x, mousePos.y - y];
+            //获取鼠标到圆心的距离
+            const len = Math.sqrt(subX * subX + subY * subY);
+            //判断鼠标到圆心的距离是否小于半径
+            const b1 = len < radius;
+            //获取鼠标位减图形位的方向 dir
+            let dir = Math.atan2(subY, subX);
+            if (dir < 0) { dir += Math.PI * 2 }
+            //判断鼠标向量的方向是否在扇形的夹角之间
+            const b2 = dir > startAngle && dir < endAngle;
+            return b1 && b2;
+        };
+
+        //获取鼠标位置
+        function getMousePos(event) {
+            //获取鼠标位置
+            const { clientX, clientY } = event;
+            //获取canvas 边界位置
+            const { top, left } = canvas.getBoundingClientRect();
+            //计算鼠标在canvas 中的位置
+            const x = clientX - left;
+            const y = clientY - top;
+            return { x, y };
+        };
+
+        /*实例化扇形*/
+        const item = new Sector(180, Math.PI, Math.PI * 3 / 2);
+        item.x = width / 2;
+        item.y = height / 2;
+        item.text = '防护服';
+        item.data = 1000;
+        item.updatePoints();
+
+        /*实例化提示框*/
+        const tip = new Tip();
+        tip.x = item.x;
+        tip.y = item.y;
+
+        //监听鼠标移动事件
+        canvas.addEventListener('mousemove', function (event) {
+            /*判断鼠标是否在扇形中
+            *   如果在：
+            *       显示提示提示
+            *       设置提示下一个点位的位置
+            *       设置提示内容
+            *       设置提示状态为运动状态
+            *       设置扇形为扩展状态
+            *   如果不在
+            *       隐藏提示
+            *       设置扇形为收缩状态
+            * */
+            //鼠标位置
+            const mousePos = getMousePos(event);
+
+            if (containPoint(item, mousePos)) {
+                tip.visible = true;
+                tip.nx = mousePos.x + 10;
+                tip.ny = mousePos.y + 20;
+                tip.text = item.data;
+                tip.state = 1;
+                item.state = 1;
+            } else {
+                tip.visible = false;
+                item.state = 2;
+            }
+            //按需渲染
+            // render();
+        });
+
+        //计时器 time
+        let time = new Date();
+
+        //渲染
+        render();
+        //渲染方法
+        function render() {
+            //获取时间差
+            const now = new Date();
+            const diff = now - time;
+            time = now;
+            //清理画布
+            ctx.clearRect(0, 0, width, height);
+            //更新扇形半径
+            item.updateRad(diff);
+            //绘制系列图像
+            item.draw(ctx);
+            //更新提示位置
+            tip.updatePos();
+            //绘制提示
+            tip.draw(ctx);
+            //连线渲染
+            requestAnimationFrame(render);
+        };
+
+
+    </script>
+</body>
+
+</html>
