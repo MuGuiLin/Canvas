@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-旋转球</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: indigo;
+            border: 1px solid gray;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+
+        Canvas的精彩：
+        Canvas精彩之处在于程序算法和艺术的结合。
+        它可以用理性的逻辑算法来寻找艺术中美的规律。
+        若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+    </canvas>
+
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        const [width, height] = [window.innerWidth, window.innerHeight];
+
+        // 设置画布宽高
+        canvas.width = 800 || width;
+        canvas.height = 600 || height;
+
+        // 获取画布上下文对象
+        const ctx = canvas.getContext('2d');
+
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
+         * 
+         * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
+         * 
+         * 路局裁剪是基于路径的一种合成方式，它只能使用路径设置裁剪区域，如果是文字的话，就无效。
+         * 透明度合成和全局合成都是基于像素的操作
+         **/
+
+        // 柱体矩形类的绘制
+
+        class Point {
+            constructor(x, y, z) {
+                this.x = x;
+                this.y = y;
+                this.z = z;
+                this.xCount = 20; // x 方向的点数
+                this.zCount = 20; // z 方向的点数
+                this.points = [];
+                this.step = canvas.width / this.xCount; // x 方向点之间的间隔
+            };
+
+            // 初始化矩阵
+            init() {
+                const { xCount, zCount, step } = this;
+                for (let i = -(xCount - 1) / 2; i <= (xCount - 1) / 2; i++) {
+                    for (let j = -(zCount - 1) / 2; j <= (zCount - 1) / 2; j++) {
+                        let x = i;
+                        let z = j;
+                        let y = 0;
+                        this.points.push(
+                            new Point((x + xCount / 2) * step, canvas.height + 1, z * step)
+                        );
+                    }
+                };
+            };
+
+            // 根据 perspective 和 z 获取三维坐标对应二维坐标的xy缩放值
+            getScaleByZ(z, p = 600) {
+                let scale;
+                if (z > p) {
+                    scale = Infinity;
+                } else {
+                    scale = p / (-z + p);
+                }
+                return scale;
+            };
+
+            draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const { x, y } = this;
+                let rectWidth = 5;
+                this.points.forEach((point) => {
+                    let scale = this.getScaleByZ(point.z);
+                    let drawX = x + (point.x - x) * scale;
+                    let drawY = y + (point.y - y) * scale;
+                    let drawWidth = rectWidth * scale
+
+                    ctx.fillStyle = '#abcdef';
+                    ctx.fillRect(drawX, drawY, drawWidth, drawWidth);
+                });
+            };
+        };
+
+
+        const P = new Point(canvas.width / 2, canvas.height / 2, 0);
+        P.init();
+        P.draw();
+
+    </script>
+</body>
+
+</html>
