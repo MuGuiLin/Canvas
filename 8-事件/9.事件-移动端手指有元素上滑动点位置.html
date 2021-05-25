@@ -16,14 +16,16 @@
             margin: 50px auto;
             width: 500px;
             height: 50px;
-            background: red;
+            line-height: 50px;
+            background: blueviolet;
+            text-align: center;
+            color: white;
         }
     </style>
 </head>
 
 <body>
-    <section class="bar" id="bar">
-    </section>
+    <section class="bar" id="bar"> 请在移动端下查看！ </section>
 
     <script>
 
@@ -62,7 +64,7 @@
         };
 
 
-        /*移动端 - 触摸事件*/
+        /*移动端 - 触摸事件 更多实例请看 -> 9-合成 中的刮刮乐 和 拿铁黑咖啡*/
         bar.addEventListener('touchstart', function (event) {
             const { x, y } = getTouchPos(event);
             console.log(x, y);
@@ -71,12 +73,13 @@
             event.preventDefault();
             const { x, y } = getTouchPos(event);
             console.log(x, y);
-            bar.innerText = x;
+            bar.innerText = 'X坐标：' + x;
         });
-        
+
         bar.addEventListener('touchend', function () {
             bar.ontouchmove = null;
         });
+
 
     </script>
 </body>

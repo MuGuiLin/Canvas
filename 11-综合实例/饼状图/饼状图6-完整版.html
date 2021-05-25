@@ -241,16 +241,17 @@
                 ctx.fill();
                 /*绘制引导线 lineTo() */
                 ctx.beginPath();
+				ctx.lineWidth = 1;
                 ctx.moveTo(p1.x, p1.y);
                 ctx.lineTo(p2.x, p2.y);
                 ctx.lineTo(p3.x, p3.y);
-                ctx.strokeStyle = 'white';
+                ctx.strokeStyle = color || 'white';
                 ctx.stroke();
                 /*绘制标签文字 fillText()*/
-                ctx.fillStyle = 'yellow';
+                ctx.fillStyle = color ||'yellow';
                 ctx.textBaseline = 'middle';
                 ctx.textAlign = textAlign;
-                ctx.font = '16px Arial';
+                ctx.font = 'bold 18px  Arial';
                 ctx.fillText(text, p4.x, p4.y);
                 //还原上一次保存的状态
                 ctx.restore();
@@ -278,7 +279,7 @@
         class Tip {
             constructor() {
                 this.text = '';
-                this.fontSize = 14;
+                this.fontSize = 18;
                 this.x = 0;
                 this.y = 0;
                 this.visible = false;

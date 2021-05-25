@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-事件</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: indigo;
+            border: 1px solid gray;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+
+        Canvas的精彩：
+        Canvas精彩之处在于程序算法和艺术的结合。
+        它可以用理性的逻辑算法来寻找艺术中美的规律。
+        若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+    </canvas>
+
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
+
+        const [width, height] = [window.innerWidth, window.innerHeight];
+
+        // 设置画布宽高
+        canvas.width = 800 || width;
+        canvas.height = 600 || height;
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
+         *
+         * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
+         *
+         * Canvas的精彩：
+         *    Canvas精彩之处在于程序算法和艺术的结合。
+         *    它可以用理性的逻辑算法来寻找艺术中美的规律。
+         *    若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+         **/
+
+        // 注：之前是用context.isPointInPath(x, y); 方法来判断鼠标或手指是否点在路径中
+        // 而：现在可用context.isPointInStroke(path, x, y); 方法来判断鼠标或手指是否点在路径中（也就是是否点在描边上）
+
+
+        // 描边选择 context.isPointInStroke(path, x, y)
+        class ArcPath {
+            constructor() {
+                this.width = canvas.width / 2;
+                this.height = canvas.height / 2;
+                this.text = false;
+            };
+
+            draw(bool) {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+
+                const { width, height, text } = this;
+
+                context.beginPath();
+                context.lineWidth = 50;
+                context.strokeStyle = bool ? 'yellow' : 'blue';
+                context.arc(width, height, 200, 0, Math.PI * 2, false);
+
+                // context.stroke(); // 注：哪怕没显示路径，isPointInStroke()也能判断到哦！！！
+
+                context.stroke();
+
+                // context.beginPath(); // 注：beginPath()方法 具有清空路径集合功能，一旦清空isPointInStroke()就不能判断了哦！！！
+                
+
+                context.font = 'bold 56px sans-serif';
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                context.fillStyle = bool ? 'red' : 'white';
+                context.fillText(text, width, height, canvas.width);
+
+            };
+        };
+
+        const AP = new ArcPath();
+        AP.draw();
+
+        canvas.addEventListener('mousemove', function ({ clientX, clientY }) {
+            const bool = context.isPointInStroke(clientX, clientY);
+            console.log('', bool);
+            AP.draw(bool);
+            AP.text = bool;
+        });
+
+    </script>
+</body>
+
+</html>
