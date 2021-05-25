@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-图形绘制</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: indigo;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+
+        Canvas的精彩：
+        Canvas精彩之处在于程序算法和艺术的结合。
+        它可以用理性的逻辑算法来寻找艺术中美的规律。
+        若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+    </canvas>
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        // 设置画布宽高
+        canvas.width = 800;
+        canvas.height = 600;
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
+         * 
+         * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
+         **/
+
+
+        // 椭圆绘制方法 - 实验功能
+        // https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/ellipse
+        // context.ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise);
+
+        /**参数说明
+         * context.ellipse(
+         *      x, y,   // 椭圆中心点
+         *      radiusX, radiusY, 椭圆的两个大小半径
+         *      rotation, 椭圆旋转度数（默认0 === 时钟3点正）
+         *      startAngle, endAngle, 椭圆的起始和结束弧度
+         *      anticlockwise true/false   绘图方向 顺(默认false)逆时针
+         * );
+         * 
+        */
+
+        context.lineWidth = 5;
+
+        context.beginPath();
+        context.ellipse(
+            200, 300,
+            150, 110,
+            Math.PI / 4,  // Math.PI == 180度， Math.PI / 4 == 45度，  Math.PI / 2 == 90度
+            0, Math.PI * 2,
+            false
+        );
+        context.strokeStyle = 'blue';
+        context.stroke();
+
+        context.beginPath();
+        context.ellipse(
+            550, 300,
+            150, 110,
+            0,  // Math.PI == 180度， Math.PI / 4 == 45度，  Math.PI / 2 == 90度
+            Math.PI / 4, Math.PI + 1.5,
+            false
+        );
+        context.strokeStyle = 'yellow';
+        context.stroke();
+
+        context.beginPath();
+        context.ellipse(
+            560, 300,
+            150, 110,
+            0,  // Math.PI == 180度， Math.PI / 4 == 45度，  Math.PI / 2 == 90度
+            Math.PI / 4, Math.PI + 1.5,
+            true
+        );
+        context.lineWidth = 20;
+        context.strokeStyle = 'red';
+        context.stroke();
+
+
+
+    </script>
+</body>
+
+</html>
