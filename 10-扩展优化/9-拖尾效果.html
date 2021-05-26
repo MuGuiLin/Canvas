@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-实验功能-Path2D</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: indigo;
+            border: 1px solid gray;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+
+        Canvas的精彩：
+        Canvas精彩之处在于程序算法和艺术的结合。
+        它可以用理性的逻辑算法来寻找艺术中美的规律。
+        若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+    </canvas>
+
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
+
+        const [width, height] = [window.innerWidth, window.innerHeight];
+
+        // 设置画布宽高
+        canvas.width = width;
+        canvas.height = height;
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
+         *
+         * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
+         *
+         * Canvas的精彩：
+         *    Canvas精彩之处在于程序算法和艺术的结合。
+         *    它可以用理性的逻辑算法来寻找艺术中美的规律。
+         *    若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+         **/
+
+        // 之前：我们在做动画时会使用clearRect()方法来清理上次绘制的图形，
+        // 如果：我们使用一个半透明的矩形清理画面，就能实现拖尾效果啦！！
+        // 当然：这个半透明的矩形是可以修改的，如可以加半透明的颜色、半透明图片等。
+
+        //小球对象化
+        class Ball {
+            constructor(r, color = 'red') {
+                this.color = color;
+                this.r = r;
+                this.x = 0;
+                this.y = 0;
+            }
+            draw(context) {
+                context.save();
+                context.beginPath();
+                context.fillStyle = this.color;
+                context.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+                context.fill();
+                context.restore();
+            }
+        }
+
+        //实例化小球
+        let ball = new Ball(15);
+        ball.y = 50;
+        ball.x = width / 2;
+
+        //记录时间 time
+        let time = new Date();
+
+        //重力 gravity
+        const gravity = 0.01;
+
+        //弹力
+        const bounding = -0.8;
+
+        //速度/毫秒 vy
+        let vy = 0.3;
+        let vx = 0.3;
+
+        //动画方法
+        function animate() {
+            //时间差
+            let now = new Date();
+            let diff = now - time;
+            time = now;
+
+            //加速度
+            vy += gravity;
+
+            //设置小球位置
+            ball.y += vy * diff;
+            ball.x += vx * diff;
+
+            //底部碰撞
+            if (ball.y + ball.r > height) {
+                ball.y = height - ball.r;
+                vy *= bounding;
+            }
+            //左侧碰撞
+            if (ball.x - ball.r < 0) {
+                ball.x = ball.r;
+                vx *= bounding;
+            }
+            //右侧碰撞
+            if (ball.x + ball.r > width) {
+                ball.x = width - ball.r;
+                vx *= bounding;
+            }
+
+        };
+
+        //渲染方法
+        !(function render() {
+            //设置动画
+            animate();
+            //擦除
+            // context.clearRect(0,0,width,height);
+            context.fillStyle = 'rgba(250, 235, 215, 0.1)';
+            context.fillRect(0, 0, width, height);
+
+            //绘图
+            ball.draw(context);
+            //递归调用render函数
+            window.requestAnimationFrame(render);
+        })();
+
+    </script>
+</body>
+
+</html>

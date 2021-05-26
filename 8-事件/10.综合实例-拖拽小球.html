@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>小球拖拽+弹动</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden
+        }
+
+        #canvas {
+            background: antiquewhite;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+
+        Canvas的精彩：
+        Canvas精彩之处在于程序算法和艺术的结合。
+        它可以用理性的逻辑算法来寻找艺术中美的规律。
+        若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+    </canvas>
+
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
+
+        const [width, height] = [window.innerWidth, window.innerHeight];
+
+        // 设置画布宽高
+        canvas.width = width;
+        canvas.height = height;
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
+         *
+         * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
+         *
+         * Canvas的精彩：
+         *    Canvas精彩之处在于程序算法和艺术的结合。
+         *    它可以用理性的逻辑算法来寻找艺术中美的规律。
+         *    若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+         **/
+
+        //简单圆形
+        class Ball {
+            constructor(r = 0, color = 'blue') {
+                this.r = r;
+                this.color = color;
+                this.x = 0;
+                this.y = 0;
+                this.nx = 0;
+                this.ny = 0;
+                this.state = 0;
+                this.rate = 0.1;
+            }
+            updatePos() {
+                if (!this.state) { return }
+                const subX = this.nx - this.x;
+                const subY = this.ny - this.y;
+                this.x += subX * this.rate;
+                this.y += subY * this.rate;
+                const distance = Math.sqrt(subX * subX + subY * subY);
+                if (distance < 1) {
+                    this.state = 0;
+                }
+            }
+            draw(context) {
+                const { x, y, r, color } = this;
+                context.save();
+                context.beginPath();
+                context.arc(x, y, r, 0, Math.PI * 2);
+                context.fillStyle = color;
+                context.fill();
+                context.restore();
+            }
+        }
+        //记录时间 time
+        let time = null;
+        //重力 gravity
+        let gravity = 0;
+        //弹力 bounce
+        let bounce = -0.8;
+        //速度/毫秒 vy
+        let vy = 0;
+
+        const ball = new Ball(50);
+        ball.x = canvas.width / 2;
+        ball.y = 0;
+        const bottom = canvas.height - ball.r
+
+        // render();
+
+        /*鼠标拖拽*/
+        //鼠标位减图形位
+        let subPos = null;
+        //鼠标是否在图形中
+        let drag = false;
+
+        //点击事件
+        canvas.addEventListener('mousedown', mousedownFn);
+        //移动
+        canvas.addEventListener('mousemove', mousemoveFn);
+        //鼠标抬起
+        canvas.addEventListener('mouseup', mouseupFn);
+
+        function mousedownFn(event) {
+            //鼠标位置
+            const mousePos = getMousePos(event);
+            //鼠标位减图形位
+            subPos = {
+                x: mousePos.x - ball.x,
+                y: mousePos.y - ball.y,
+            };
+            //判断鼠标是否在图形中
+            drag = containPoint(ball, mousePos);
+            if (drag) {
+                ball.state = 1;
+                ball.nx = mousePos.x - subPos.x;
+                ball.ny = mousePos.y - subPos.y;
+            }
+        }
+        function mousemoveFn(event) {
+            const mousePos = getMousePos(event);
+            if (drag) {
+                ball.state = 1;
+                ball.nx = mousePos.x - subPos.x;
+                ball.ny = mousePos.y - subPos.y;
+            }
+        }
+        function mouseupFn() {
+            if (drag) {
+                drag = false;
+                ball.state = 0;
+                gravity = 0.01;
+                time = new Date();
+            }
+        }
+        //判断点是否在图形中
+        function containPoint(obj, mousePos) {
+            //获取鼠标到圆心的距离
+            const len = Math.sqrt(subPos.x * subPos.x + subPos.y * subPos.y);
+            //判断鼠标到圆心的距离是否小于r
+            return len < obj.r;
+        }
+
+        //获取鼠标在canvas中的位置
+        function getMousePos(event) {
+            //获取鼠标位置
+            const { clientX, clientY } = event;
+            //获取canvas 边界位置
+            const { top, left } = canvas.getBoundingClientRect();
+            //计算鼠标在canvas 中的位置
+            const x = clientX - left;
+            const y = clientY - top;
+            return { x, y };
+        }
+
+        //动画方法
+        function animate() {
+            //时间差
+            let now = new Date();
+            let diff = now - time;
+            time = now;
+
+            //加速度
+            vy += gravity;
+
+            //设置小球位置
+            ball.y += vy * diff;
+
+            //底部碰撞检测
+            if (ball.y >= bottom) {
+                ball.y = bottom;
+                vy *= bounce;
+            }
+        }
+
+        !(function render() {
+            if (drag) {
+                ball.updatePos();
+            } else {
+                animate();
+            }
+            // context.clearRect(0, 0, canvas.width, canvas.height);
+            context.fillStyle = 'rgba(251, 251, 255, 0.05)';
+            context.fillRect(0, 0, width, height);
+
+            ball.draw(context);
+            requestAnimationFrame(render);
+        })();
+
+
+    </script>
+</body>
+
+</html>
