@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-视线跟随</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: indigo;
+            border: 1px solid gray;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <img src="./img/向量.jpg" alt="" />
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+
+        Canvas的精彩：
+        Canvas精彩之处在于程序算法和艺术的结合。
+        它可以用理性的逻辑算法来寻找艺术中美的规律。
+        若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+    </canvas>
+
+    <!-- <script src="./js/vector2.js"></script> -->
+    <script type="module">
+        import Vector2 from './js/vector2.js'
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        // 获取画布上下文对象
+        const ctx = canvas.getContext('2d');
+
+        const [width, height] = [window.innerWidth, window.innerHeight];
+
+        // 设置画布宽高
+        canvas.width = width;
+        canvas.height = height;
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
+         *
+         * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
+         *
+         * Canvas的精彩：
+         *    Canvas精彩之处在于程序算法和艺术的结合。
+         *    它可以用理性的逻辑算法来寻找艺术中美的规律。
+         *    若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+         **/
+
+        //img 加载器
+        const ImgLoader = {
+            onload(imgs, fn) {
+                const imgPros = imgs.map((ele) => {
+                    return ImgLoader.imgPro(ele);
+                });
+                Promise.all(imgPros).then((val) => {
+                    fn(val);
+                }, () => {
+                    console.error('图片加载失败');
+                });
+            },
+            imgPro(img) {
+                return new Promise((resolve) => {
+                    img.onload = function () {
+                        resolve(img);
+                    }
+                });
+            }
+        };
+
+        //身体图
+        class BodyRect {
+            constructor(img, pos) {
+                this.img = img;
+                this.pos = pos;
+            };
+            draw(ctx) {
+                const { img, pos } = this;
+                ctx.save();
+                ctx.drawImage(img, pos.x, pos.y);
+                ctx.restore();
+            };
+        };
+        //眼睛图
+        class EyeRect {
+            constructor(img, pos, offset) {
+                this.img = img;
+                this.pos = pos;
+                this.offset = offset;
+            };
+            draw(ctx) {
+                const { img, pos, offset } = this;
+                ctx.save();
+                ctx.drawImage(img, pos.x - offset, pos.y - offset);
+                ctx.restore();
+            };
+        };
+
+        //眼睛的感知距离
+        const maxR = 50;
+        //眼眶的半径
+        const rimR = 15;
+        //两只眼睛相对于怪兽的位置
+        const basicPos = [new Vector2(126, 52), new Vector2(219, 59)];
+        //眼瞳的偏移距离。drawImage 时，眼球的基点在左上角，需调整致中心
+        const eyeR = 11;
+        //身体和眼睛
+        let monsterBody, eyeLeft, eyeRight;
+        //移动变换的位置
+        let monsterPos = getMonsterPos();
+
+        //怪物身体图片
+        const bodyImg = new Image();
+        bodyImg.src = './img/404.png';
+        //眼睛图片
+        const eyeImg = new Image();
+        eyeImg.src = './img/eye.png';
+        //当两个图片加载成功后，渲染图形
+        ImgLoader.onload([bodyImg, eyeImg], loadedFn);
+
+
+        //渲染方法
+        function render() {
+            //清理
+            ctx.clearRect(0, 0, width, height);
+            //渲染
+            ctx.save();
+            ctx.translate(monsterPos.x, monsterPos.y);
+            monsterBody.draw(ctx);
+            eyeLeft.draw(ctx);
+            eyeRight.draw(ctx);
+            ctx.restore();
+        };
+
+        //鼠标移动
+        function mousemoveFn(event) {
+            //获取鼠标位置
+            const mousePos = new Vector2(event.clientX, event.clientY).sub(monsterPos);
+            //遍历两个眼瞳
+            [eyeLeft, eyeRight].forEach((ele, ind) => {
+                //获取鼠标到眼瞳基点的距离
+                const mouseSubObj = mousePos.clone().sub(basicPos[ind]);
+                //以眼睛中心为基点，按照比例计算瞳孔到圆心的距离
+                const radius = Math.min(mouseSubObj.length() / maxR, 1) * rimR;
+                //设置眼瞳位置
+                const pos = mouseSubObj.setLength(radius).add(basicPos[ind]);
+                //为眼睛的位置赋值
+                ele.pos.copy(pos);
+            });
+            //渲染
+            render();
+        };
+
+        //获取怪兽位置
+        function getMonsterPos() {
+            return new Vector2(canvas.width - 500, canvas.height - 500);
+        };
+
+        //窗口尺寸改变
+        function resizeFn() {
+            const [width, height] = [window.innerWidth, window.innerHeight];
+            canvas.width = width;
+            canvas.height = height;
+            monsterPos = getMonsterPos();
+            render();
+
+        };
+
+        function loadedFn() {
+            //建立身体和眼睛
+            monsterBody = new BodyRect(bodyImg, new Vector2(0, 0));
+            eyeLeft = new EyeRect(eyeImg, basicPos[0].clone(), eyeR);
+            eyeRight = new EyeRect(eyeImg, basicPos[1].clone(), eyeR);
+
+            //渲染
+            render();
+
+            //添加鼠标移动事件
+            canvas.addEventListener('mousemove', mousemoveFn);
+            //监听窗口尺寸的改变
+            window.addEventListener('resize', resizeFn);
+        };
+
+    </script>
+</body>
+
+</html>

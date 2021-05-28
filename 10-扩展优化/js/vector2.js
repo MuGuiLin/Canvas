@@ -2,6 +2,14 @@
  * 二维向量相关方法
  * */
 export default class Vector2 {
+    // 坐标极 dir：方向, len 长度
+    static polar(dir, len) {
+        return new Vector2(
+            Math.cos(dir) * len,
+            Math.sin(dir) * len
+        );
+    };
+
     constructor(x = 0, y = 0) {
         this.x = x;
         this.y = y;
@@ -41,7 +49,7 @@ export default class Vector2 {
          */
     };
 
-    // 旋转弧度 angle
+    // 旋转弧度 
     rotate(a) {
         const { x, y } = this;
         const cos = Math.cos(a);
@@ -77,16 +85,7 @@ export default class Vector2 {
     // 复制
     copy(v) {
         this.x = v.x;
-        this.y - v.y;
+        this.y = v.y;
         return this;
     };
-
-    // 坐标极 dir：方向, len 长度
-    static(dir, len) {
-        return new Vector2(
-            Math.cos(dir) * len,
-            Math.sin(dir) * len
-        );
-    };
-
 };

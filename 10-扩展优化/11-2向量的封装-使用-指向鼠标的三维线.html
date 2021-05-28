@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-指向鼠标的三维线</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: indigo;
+            border: 1px solid gray;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <img src="./img/向量.jpg" alt="" />
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+
+        Canvas的精彩：
+        Canvas精彩之处在于程序算法和艺术的结合。
+        它可以用理性的逻辑算法来寻找艺术中美的规律。
+        若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+    </canvas>
+
+    <!-- <script src="./js/vector2.js"></script> -->
+    <script type="module">
+        import Vector2 from './js/vector2.js'
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
+
+        const [width, height] = [window.innerWidth, window.innerHeight];
+
+        // 设置画布宽高
+        canvas.width = width;
+        canvas.height = height;
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
+         *
+         * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
+         *
+         * Canvas的精彩：
+         *    Canvas精彩之处在于程序算法和艺术的结合。
+         *    它可以用理性的逻辑算法来寻找艺术中美的规律。
+         *    若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
+         **/
+
+        // 圆对象
+        class Circle {
+            constructor(pos, r = 0) {
+                this.r = r; // 圆的半径大小
+                this.pos = pos || new Vector2();
+                this.init();
+            };
+            init() {
+                context.save();
+
+                context.beginPath();
+                // 中间圆
+                context.arc(width / 2, height / 2, 100, Math.PI * 2, 0);
+                context.fillStyle = 'blue';
+                context.fill();
+
+                // 中间横线
+                context.moveTo(width / 2 - 300, height / 2);
+                context.lineTo(width / 2 + 300, height / 2);
+                // 中间竖线
+                context.moveTo(width / 2, height / 2 - 300);
+                context.lineTo(width / 2, height / 2 + 300);
+                context.strokeStyle = 'white';
+                context.stroke();
+
+                // 文字
+                context.font = '26px sans-serif';
+                context.fillStyle = 'yellow';
+
+                context.textAlign = 'left';
+                context.textBaseline = 'middle';
+                context.fillText('0度', width / 2 + 210, height / 2, width);
+
+                context.textBaseline = 'top';
+                context.textAlign = 'center';
+                context.fillText('90度', width / 2, height / 2 + 210, width);
+
+                context.restore();
+            };
+            draw() {
+                const { r, pos: { x, y } } = this;
+                context.save();
+                context.beginPath();
+                context.arc(x, y, r, 0, Math.PI * 2, 0);
+                context.strokeStyle = 'white';
+                // 虚线
+                context.setLineDash([10]);
+                context.stroke();
+                context.restore();
+            };
+        };
+
+        // 线对象
+        class Line {
+            constructor(start = new Vector2(), end = new Vector2()) {
+                this.start = start; // 线的起始点位：x, y
+                this.end = end; // 线的终点：x, y
+
+            };
+            draw() {
+                const { start, end } = this;
+                context.save();
+                // 线条
+                context.beginPath();
+                context.moveTo(start.x, start.y);
+                context.lineTo(end.x, end.y);
+                context.lineWidth = 4;
+                context.strokeStyle = 'red';
+                context.stroke();
+
+                // 终点 (小圆)
+                context.beginPath();
+                context.arc(end.x, end.y, 10, 0, Math.PI * 2, 0);
+                context.fillStyle = 'yellow';
+                context.fill();
+                context.restore();
+            };
+        };
+
+        // 线长
+        const len = 200;
+
+        // 外大圆半径
+        const r2 = 300;
+
+        // 线的基点(起始点)
+        const basePos = new Vector2(width / 2, height / 2);
+
+        // 圆对象
+        const C = new Circle(basePos.clone(), len);
+        C.pos.copy(basePos);
+        C.draw();
+
+        //  外大圆对象
+        const C2 = new Circle(basePos.clone(), r2);
+        C2.pos.copy(basePos);
+        C2.draw();
+
+        // 线对象
+        const L = new Line(basePos.clone(), new Vector2(basePos.x + len, basePos.y));
+        L.draw();
+
+        // 渲染方法
+        function render() {
+            context.clearRect(0, 0, width, height);
+            C.init();
+            C.draw();
+            C2.draw();
+            L.draw();
+        };
+
+        // 鼠标在Canvas、window...中的移动事件
+        (canvas || window || globalThis || document).addEventListener('mousemove', function ({ clientX, clientY }) {
+            // console.log(clientX, clientY);
+
+            // 向量对象 鼠标在Canvas画布中的位置x， y  注：有滚动条之类的会影响位置哦！！
+            const mPos = new Vector2(clientX, clientY);
+
+            // 向量mbPos = 鼠标位置 减去 基点位置，得到 鼠标相对于 基点位置
+            const mbPos = mPos.sub(basePos);
+
+            // 获取鼠标到基点的距离，计算此距离 和 外大圆半径的比例
+            let ratio = mbPos.length() / r2;
+
+            // 主比例不超过1(如果变量ratio中的值小于1，就取ratio中的值，否则[也就是超过1就为1]) 【也就是， 当鼠标在外大圆移动时，终点会根据比值缩放，如超出外大圆，那终点就是内虚线圆的半径】
+            ratio = Math.min(ratio, 1);
+
+            // 计算线向量的长度（也就是三维线的长度）
+            const linLen = len * ratio;
+
+            // 将向量mbPos的长度和 len线长 相等 得到pos
+            const pos = mbPos.setLength(linLen);
+
+            // 基于 基点 位置 偏移向量
+            pos.add(basePos);
+
+            // 更新线的终点位置
+            L.end.copy(pos);
+            // console.log('角度：', mPos.angle());
+
+            // 更新后执行渲染方法
+            render();
+        });
+    </script>
+</body>
+
+</html>
