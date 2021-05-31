@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5-Canvas-合成</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* overflow: hidden; */
+        }
+
+        #canvas {
+            /* width: 100px;
+            height: 100px; */
+            background-color: indigo;
+            border: 1px solid gray;
+
+            /*点击穿透*/
+            /* pointer-events: none; */
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas" width="300" height="150">
+        对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
+        canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
+        canvas尺寸设置：建议直接在canvas标签上设置，或者是在js中的canvas.width/height上设置，不建议在CSS样式中设置，但（在CSS中的优先级最高）；
+    </canvas>
+
+    <script>
+        // 获取画布DOM
+        const canvas = document.querySelector('#canvas');
+
+        const [width, height] = [window.innerWidth, window.innerHeight];
+
+        // 设置画布宽高
+        canvas.width = width;
+        canvas.height = height;
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
+
+
+        /**
+         * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
+         * 
+         * 注意：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】！！
+         * 
+         * 路局裁剪是基于路径的一种合成方式，它只能使用路径设置裁剪区域，如果是文字的话，就无效。
+         * 透明度合成和全局合成都是基于像素的操作
+         **/
+
+        /**
+         *  在 学习像素级操作的时候说过putImageData() 可以把ImageData对象放进canvas画布里。
+            在 学习合成的时候说过globalAlpha 可以控制全局对象的透明度，clip()可以基于路径裁剪图形，globalCompositeOperation 可以基于像素数据合成图像。
+
+            然而，当上面所说的合成方法遇到了putImageData，那就得另当别论了。       
+        */
+
+        // 创建imgData对象
+        const imgData = context.createImageData(400, 400);
+
+        // 循环设置imgData对象（像素级操作）
+        imgData.data.forEach((o, i) => {
+            imgData.data[i] = 255; // RGB 都是255 也就是白色
+        });
+
+        /**
+         *  设置透明度
+         *  注：设置globalAlpha透明度 对 putImageData()无效，如果要对putImageData()设置透明度，可用像素级操作来设置！！
+         *  注：设置clip、globalCompositeOperation等裁剪 对putImageData()无效，如果要对putImageData()设置裁剪，目前的方法是作为已绘图形来操作，而不是在将绘图形中设置！！
+        */
+
+        // 设置透明度
+        context.globalAlpha = 0.5;
+
+        // 将imageData绘制制画布中
+        context.putImageData(imgData, 0, 0);    // 注：设置globalAlpha透明度 对 putImageData()无效
+
+        context.fillStyle = 'white';
+        context.fillRect(400, 0, 400, 400);     // globalAlpha 对这些是有效的
+
+        // 如果要对putImageData()设置透明度，可用像素级操作来设置
+        // imgData.data.forEach((o, i) => {
+        for (let i = 0; i < imgData.width * imgData.height; i++) {
+            // imgData.data[i] = 255; // RGB 都是255 也就是白色
+            imgData.data[4 * i] = 0;        //R
+            imgData.data[4 * i + 1] = 255;  //G
+            imgData.data[4 * i + 2] = 0;    //B
+            imgData.data[4 * i + 3] = 80;   //A
+        };
+        // });
+
+        // 将imageData绘制制画布中
+        context.putImageData(imgData, 0, 500);    // 现在，用就透明效果啦
+
+
+        /**
+         * 路径裁剪
+         *
+        */
+        // context.save();
+        // context.beginPath();
+        // context.arc(1200, 400, 200, 0, Math.PI * 2, 0);
+        // context.stroke();
+        // context.clip(); // 裁剪
+        // context.fillStyle = 'blue';
+        // context.fillRect(1200, 400, 400, 400); // 被裁剪了
+        // context.putImageData(imgData, 1200, 0); // 裁剪无效
+        // context.restore()
+
+
+        /**
+        * 全局合成
+        *
+       */
+        // context.save();
+        // context.beginPath();
+        // context.arc(1200, 400, 200, 0, Math.PI * 2, 0);
+        // context.fill();
+        // context.globalCompositeOperation = 'source-in';  // 裁剪
+        // context.fillStyle = 'red';
+        // context.fillRect(1200, 400, 400, 400);  // 被裁剪了
+        // context.putImageData(imgData, 1200, 0); // 裁剪无效
+        // context.restore();
+
+        /**
+         * putImageData()的正确裁剪方式
+         * 
+         * 用已绘图形的方式来做，就是以先putImageData()，然后再进行 fillRect() 或 arc() 或 stroke() 等！
+        */
+        context.save();
+        context.beginPath();
+
+        // 先绘制图形
+        context.putImageData(imgData, 1200, 50);
+
+        // context.globalCompositeOperation = 'source-in';
+
+        // 再
+        context.arc(1200, 400, 200, 0, Math.PI * 2, 0);
+        context.fillStyle = 'blue';
+        context.fill();
+
+        // 或再 
+        context.fillStyle = 'white';
+        context.fillRect(1200, 400, 400, 400);
+
+        context.restore();
+
+
+
+        // 所以，这就是 之前一直强调的：已绘制到Canvas画布上的图形或图像不可被修改，只能被【覆盖 或 擦除】 的原因！！
+
+    </script>
+</body>
+
+</html>
