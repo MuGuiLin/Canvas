@@ -10,22 +10,24 @@
         body {
             margin: 0;
             padding: 0;
-            /* overflow: hidden; */
+            overflow: hidden;
         }
 
         #canvas {
-            /* width: 100%;
-            height: 100%; */
+            width: 100%;
+            height: 100%;
             background-color: indigo;
             border: 1px solid gray;
 
             /*点击穿透*/
             /* pointer-events: none; */
         }
+
     </style>
 </head>
 
 <body>
+
     <canvas id="canvas" width="300" height="150">
         对不起！当您能看到这句话时，表示您当前的浏览器不支持canvas标签（IE9级以上才兼容），建议您升级浏览器后再试！
         canvas尺寸：默认大小：宽300px, 高150px，最大尽量在4096px以内（当然不同的浏览器也会不一样）；
@@ -37,18 +39,19 @@
         若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
     </canvas>
 
+
     <script>
+
         // 获取画布DOM
         const canvas = document.querySelector('#canvas');
-
-        // 获取画布上下文对象
-        const context = canvas.getContext('2d');
-
         const [width, height] = [window.innerWidth, window.innerHeight];
 
         // 设置画布宽高
         canvas.width = width;
         canvas.height = height;
+
+        // 获取画布上下文对象
+        const context = canvas.getContext('2d');
 
         /**
          * 注意：在canvas中绘制图形时，要【样式在前，绘制在后】，不然：样式会不生效！！
@@ -61,66 +64,31 @@
          *    若想深入研究Canvas，可以再学习图形架构、图像算法、动画算法、艺术设计等。
          **/
 
-        // 逐帧动画只考虑动画的下一帧状态，例如：小球的速度和加速度运动
+        const t1 = `1、坐标点尽量设置为整数。比如canvas 的尺寸、绘制图形时的点位、移动变换距离等。`;
 
-        // 小球
-        class Ball {
-            constructor(r = 30, c = 'blue') {
-                this.x = 0;
-                this.y = 0;
-                this.r = r;
-                this.c = c;
-            };
-            draw() {
-                const { x, y, r, c } = this;
-                context.save();
-                context.beginPath();
+        const t2 = `2、巧妙地将HTML+css 的特性与canvas 相结合，比如：`;
+        const t2a = `(a)、将静止不变的背景图，通过css设置到canvas 的background-image 里。`;
+        const t2b = `(b)、用html元素 在canvas 上做浮层，用于放置静止不变的元素。`;
 
-                context.arc(x, y, r, 0, Math.PI * 2, false);
-                context.fillStyle = c;
-                context.fill();
+        const t3 = `3、关闭canvas 透明度可提高渲染效率：const ctx = canvas.getContext('2d', { alpha: false })。`;
 
-                context.restore();
-            };
-        };
+        const t4 = `4、可以一步画出的图形，就不要分成多步来画。`;
 
-        const B = new Ball();
-        B.x = width / 2;
-        B.y = 50;
-        B.draw();
 
-        // 移动速度（像素/毫秒）
-        let speed = 0.5;
+        context.textAlign = 'left';
+        context.textBaseline = 'middle';
+        context.fillStyle = 'white';
 
-        // 计进器
-        let items = new Date();
+        context.font = '36px sans-serif';
+        context.fillText('Canvas绘制、优化-注意事项：', 100, canvas.height / 2 - 300, canvas.width);
 
-        // 动画帧
-        let frame = null;
-
-        // 停止条件
-        let stop = height - B.r;
-
-        !(function render() {
-            // 计算时间差
-            const now = new Date();
-            const diff = now - items;
-            items = now;
-            // 清除画布
-            context.clearRect(0, 0, width, height);
-
-            // 更新小球位置（匀速运动）
-            B.y += speed * diff;
-            if (B.y < stop) {
-                frame = requestAnimationFrame(render);
-            } else {
-                B.y = stop;
-                cancelAnimationFrame(frame);
-            }
-            B.draw();
-
-        })();
-
+        context.font = '16px sans-serif';
+        context.fillText(t1, 200, canvas.height / 2 - 200, canvas.width);
+        context.fillText(t2, 200, canvas.height / 2 - 150, canvas.width);
+        context.fillText(t2a, 300, canvas.height / 2 - 100, canvas.width);
+        context.fillText(t2b, 300, canvas.height / 2 - 50, canvas.width);
+        context.fillText(t3, 200, canvas.height / 2, canvas.width);
+        context.fillText(t4, 200, canvas.height / 2 + 50, canvas.width);
 
     </script>
 </body>
