@@ -1,8 +1,8 @@
 .DS_Store
 node_modules
-/dist
-/ppt
-/代码
+dist/
+ppt/
+代码/
 
 
 # local env files

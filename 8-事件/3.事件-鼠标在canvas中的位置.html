@@ -37,6 +37,7 @@
         function getPos(event) {
             /*鼠标在窗口中的位置 clientX,clientY*/
             const { clientX, clientY } = event;
+            console.log(clientX, clientY)
 
             /*获取canvas在窗口中的位置left,to，使用getBoundingClientRect 方法*/
             const { left, top } = canvas.getBoundingClientRect();
